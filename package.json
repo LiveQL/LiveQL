@@ -7,7 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prepublish": "npm run build",
+    "build": "babel --presets es2015 -d lib/ src/"
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,9 @@
   "devDependencies": {
     "babel-cli": "6.26.0",
     "babel-preset-es2015": "6.24.1",
+    "eslint": "4.18.2",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-plugin-import": "2.9.0",
     "jest": "^22.4.2"
   },
   "dependencies": {

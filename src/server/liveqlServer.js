@@ -1,6 +1,5 @@
 const graphqlHTTP = require('express-graphql');
-// const handle = require('...')
-
+const liveConfig = require('./liveqlConfig');
 /**
  * LiveQL Config Object:
  * {
@@ -17,14 +16,39 @@ const graphqlHTTP = require('express-graphql');
  * with modifications to the context and extensions field.
  *
  * @param {Object} graphqlConfig - The config object that is required for graphqlHTTP.
- * @param {Object} liveqlConfig - The LiveQL config object.
  */
-module.exports = (graphqlConfig) => {
-  // Server function
+module.exports = (graphqlObj) => {
+  // Add the uid, directive, 
   // Context zone!
-  // return (req, res) => {
+  /**
+   * context.__live = {
+   *  handle - hash of query
+   *  uid - 'id'
+   *  directive - '@live'
+   *  firstRun - True (is this the first time running?)
+   * }
+   */
+  const liveqlSettings = liveConfig.get();
+  const liveqlObj = { ...graphqlObj };
+
+  // If the user didn't pass in the context object. This could be a 
+  // time to check the liveqlSettings object for noCtx. 
+
+  return (req, res, next) => {
+    if (!liveqlObj.context) {
+      liveqlObj.context = {};
+    }
+    liveqlObj.context.__live = {};
+    liveqlObj.context.__live.handle = res.locals.handle;
+    liveqlObj.context.__live.uid = liveqlSettings.uid;
+    liveqlObj.context.__live.directive = liveqlSettings.directive;
+    liveqlObj.context.__live.firstRun = true;
     
-    // return graphqlHTTP()(req, res);
-  }
-  // 
+    if (liveObj.extensions) {
+      // Handle the case where they have an extension definied. 
+      // Higher order functions, bro.
+    } else {
+      liveObj.extensions = () => console.log('sup');
+    }
+    return graphqlHTTP(liveqlObj)(req, res, next);
 };

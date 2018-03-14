@@ -2,51 +2,51 @@
   * LiveQL Config Object:
   *  {
   *    uid: {String | Optional} - The string of the unique identifer that is returned for live objects (ex: 'live_id'). Default is 'id'.
-  *    dirStr: {String | Optional} - The string of the directive identifier (ex: @live). Just pass in the part after the @. Default is 'live'.
+  *    directive: {String | Optional} - The string of the directive identifier (ex: @live). Just pass in the part after the @. Default is 'live'.
   *    noCtx: {Boolean | Optional} - Set to true if you intentionally left the context blank so that the req object is passed.
   *    retrieve: {Function | Optional} - A function that retrieves the RDL.
   *    deploy: {Function | Optional} - A function that deploys the RDL.
   *  }
 */
 
-const liveql = {};
+const liveConfig = {};
 
 // Store the default settings.
-liveql.default = { uid: 'id', dirStr: 'live' };
+liveConfig.default = { uid: 'id', directive: 'live' };
 
 // Store the LiveQL server settings.
-liveql.config = {};
+liveConfig.config = {};
 
 /**
  * This function sets the LiveQL config object.
  * @param {Object} settings - User settings object.
  * @returns {Object} - LiveQL settings object.
  */
-liveql.setLiveConfig = (settings) => {
+liveConfig.set = (settings) => {
   if (!settings) {
-    liveql.config.uid = 'id';
-    liveql.config.dirStr = '@live';
+    liveConfig.config.uid = 'id';
+    liveConfig.config.directive = '@live';
   } else {
-    liveql.config.uid = settings.uid || liveql.default.uid;
+    liveConfig.config.uid = settings.uid || liveConfig.default.uid;
 
     // Add the @ sign to the directive if one is passed in the object.
-    if (settings.dirStr) {
+    if (settings.directive) {
       // User included @ in front of directive.
-      if (settings.dirStr.indexOf('@') === 0) {
-        liveql.config.dirStr = settings.dirStr;
+      if (settings.directive.indexOf('@') === 0) {
+        liveConfig.config.directive = settings.directive;
       } else {
-        liveql.config.dirStr = '@' + settings.dirStr;
+        liveConfig.config.directive = '@' + settings.directive;
       }
     }
-    if (settings.noCtx) liveql.config.noCtx = settings.noCtx;
-    if (settings.retrieve) liveql.config.retrieve = settings.retrieve;
-    if (settings.deploy) liveql.config.deploy = settings.deploy;
+    if (settings.noCtx) liveConfig.config.noCtx = settings.noCtx;
+    if (settings.retrieve) liveConfig.config.retrieve = settings.retrieve;
+    if (settings.deploy) liveConfig.config.deploy = settings.deploy;
   }
-  return liveql.config;
+  return liveConfig.config;
 };
 
 // Return the config object.
-liveql.getLiveConfig = () => liveql.config;
+liveConfig.get = () => liveConfig.config;
 
-module.exports = { setConfig: liveql.setLiveConfig, getConfig: liveql.getLiveConfig };
+module.exports = { set: liveConfig.set, get: liveConfig.get };
 

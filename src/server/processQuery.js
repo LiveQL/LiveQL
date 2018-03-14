@@ -1,6 +1,6 @@
 const { subscriptions } = require('./reactiveDataLayer');
 const queryHash = require('./queryHash');
-const liveql = require('./liveqlConfig');
+const liveConfig = require('./liveqlConfig');
 
 /**
  * This function creates a "hash" of a GraphQL query that is used as a WebSocket channel
@@ -21,12 +21,8 @@ module.exports = (req, res, next) => {
   // This is a not a query, so it cannot subscribe to data.
   if (open !== 0 && !query.slice(0, open).includes('query')) return next();
 
-  /**
-   * THIS ASSUMES THE DIRECTIVE IS CALLED @live.
-   * If we're going to change this we need to get a name at the point
-   * of config and look for it here.
-   */
-  const directive = liveql.getConfig().dirStr;
+  // Grab the direcive defined in the LiveQL settings.
+  const { directive } = liveConfig.get();
   if (!query.slice(0, open).includes(directive)) return next();
 
   // Get hash of query.

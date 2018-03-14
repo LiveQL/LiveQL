@@ -1,4 +1,4 @@
-const { queue } = require('./reactiveDataLayer');
+const { subscriptions } = require('./reactiveDataLayer');
 const queryHash = require('./queryHash');
 
 /**
@@ -31,10 +31,10 @@ module.exports = (req, res, next) => {
   const hash = queryHash(query, variables);
 
   // There's at least one subscriber on this query.
-  if (queue[hash]) {
-    queue[hash].listeners += 1;
+  if (subscriptions[hash]) {
+    subscriptions[hash].listeners += 1;
   } else {
-    queue[hash] = { query, variables, listeners: 1 };
+    subscriptions[hash] = { query, variables, listeners: 1 };
   }
   res.locals.handle = hash;
   return next();

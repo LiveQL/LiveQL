@@ -14,282 +14,296 @@ const RDL = require('./reactiveDataLayer');
  * @param {Object} info - Object that stores GraphQL query and schema info.
  */
 
-const liveResolver = (resolve, source, args, context, info) => {
+ const liveResolver = (resolve, source, args, context, info) => {
 
-    if (!context.__live) {
-      console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)
-      context.__live = {};
-    }
+   // return resolve().then((val) => {return val});
+   if (!context.__live) {
+     console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)
+     context.__live = {};
+   }
 
-    const handle = 'I AM A HANDLE' //context.__live.handle || '';
-    const alias = 'live' //context.__live.directive;
-    const idField = 'id' //context.__live.uid;
+   const handle = 'I AM A HANDLE' //context.__live.handle || '';
+   const alias = 'live' //context.__live.directive;
+   const idField = 'id' //context.__live.uid;
 
-    if (!context.__live.count) { // this is the first resolver to be called
-      context.__live.count = 0;
-      context.__live.reference = {};
-      context.__live.handles = [];
-    }
-    const count = context.__live.count++;
+   if (!context.__live.count) { // this is the first resolver to be called
+     context.__live.count = 0;
+     context.__live.reference = {};
+     context.__live.handles = [];
+   }
+   const count = context.__live.count++;
 
-    // The GraphQL type that will be returned from the resolver
-    const type = info.returnType;
+   // The GraphQL type that will be returned from the resolver
+   const type = info.returnType;
 
-    // The GraphQL type that this is a field of
-    const parent = info.parentType;
+   // The GraphQL type that this is a field of
+   const parent = info.parentType;
 
-    const isArray = resultIsArray(type);
-    const isObject = resultIsObject(type);
+   const isArray = resultIsArray(type);
+   const isObject = resultIsObject(type);
 
-    let typeString = type.toString();
-    if (isArray) {typeString = typeString.substring(1, typeString.length - 1)}; // strip off [ ] if it's an array
+   let typeString = type.toString();
+   if (isArray) {typeString = typeString.substring(1, typeString.length - 1)}; // strip off [ ] if it's an array
 
-    const parentString = parent.toString();
+   const parentString = parent.toString();
 
-    const fieldName = info.fieldName;
-    let fieldString = setFieldString(fieldName, info.fieldNodes[0].arguments);
+   const fieldName = info.fieldName;
+   let fieldString = setFieldString(fieldName, info.fieldNodes[0].arguments);
 
-    const rootResolver = (parentString === 'Query' || parentString === 'Mutation')
+   const rootResolver = (parentString === 'Query' || parentString === 'Mutation')
 
-    let reference = context.__live.reference;
-    let index;
-    if (Array.isArray(reference)) {
-      index = source.__liveIndex
-      reference = reference[index]; // added live prop to source in last resursish step
-    }
+   let reference = context.__live.reference;
 
-    const orphan = (!reference || reference.source !== source);
+   const fromArray = Array.isArray(reference);
+   let index;
+   if (fromArray) {
+     index = source.__liveIndex
+     reference = reference[index]; // added live prop to source in last resursish step
+   }
 
-    if (rootResolver || orphan) {
-      //console.log('ZZZZZZZZZZZZZ', source, reference);
-      context.__live.reference = setReference(source, null, getReference(parentString), null);
-      reference = context.__live.reference;
-    }
+   const orphan = (!reference || reference.source !== source);
 
-    // store lets us know where we are within the RDL
+   if (rootResolver || orphan) {
+     //console.log('ZZZZZZZZZZZZZ', source, reference);
+     context.__live.reference = setReference(source, null, getReference(parentString), null);
+     reference = context.__live.reference;
+   }
 
-    // grabs correct location from context if they were set by an array
+   // store lets us know where we are within the RDL
 
-    let handles = reference.handles;
-    context.__live.handles[count] = handles.existing;
+   // grabs correct location from context if they were set by an array
 
-    //console.log('outer resolve', reference)
+   let handles = reference.handles;
+   context.__live.handles[count] = handles.existing;
 
-    return resolve().then((val) => {
-      console.log('inner resolve')
-      console.log(reference);
+   //console.log('outer resolve', reference)
 
-      setFields(isArray, typeString, fieldString, reference);
+   return resolve().then((val) => {
+     console.log('inner resolve')
+     console.log(reference);
 
-      // looks for differences between existing data and new data
-      // diffField(store[field], val, isArray, isObject, handles);
+     setFields(isArray, typeString, fieldString, reference);
 
-      //console.log('set fields');
+     // looks for differences between existing data and new data
+     // diffField(store[field], val, isArray, isObject, handles);
 
-      // sets context for nested resolvers
+     //console.log('set fields');
 
-      // KEEP CHILD POINTED TO RIGHT PARENTSTRING
-      if (isObject) {
+     // sets context for nested resolvers
 
-        //(isArray, val, field)
-        //console.log('YYYYYYYY', reference.existing[fieldString]);
-        context.__live.reference = setReferences(isArray, val, reference.existing[fieldString]);
-        //console.log('-------object reset refs---------', context.__live.reference);
-      } else {
+     // KEEP CHILD POINTED TO RIGHT PARENTSTRING
+     if (isObject) {
 
-        //field, val, isArray, isObject, handles
-        diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
-        diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
-      };
+       //(isArray, val, field)
+       //console.log('YYYYYYYY', reference.existing[fieldString]);
+       reference.replacement[fieldString] = reference.existing[fieldString];
+       context.__live.reference = setReferences(isArray, val, reference.existing[fieldString]);
+       //console.log('-------object reset refs---------', context.__live.reference);
+     } else {
 
-      //console.log('set context');
+       //field, val, isArray, isObject, handles
+       diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
+       diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
+     };
 
-      reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
-      reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
+     //console.log('set context');
 
-      if (fieldName === idField) {
-        console.log('this object has an id');
-        // combine replacement with object with that id
-        const x = getReference(val);
-        let fields = Object.keys(reference.replacement);
-        //console.log('fields', fields);
-        for (field of fields) {
-          // diffField(field, val, isArray, isObject, handles)
-          let fieldHasArray = Array.isArray(reference.replacement[field].data);
-          if (!x[field]) {x[field] = setField(fieldHasArray, reference.replacement[field].type)}
-          diffField(x[field], reference.replacement[field].data, fieldHasArray, false, handles.replacement);
-          Object.assign(x[field].subscribers, reference.replacement[field].subscribers);
+     reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
+     reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
 
-          // TODO - have way of making sure child parentFields have reference back up to right field
-          //console.log('SHOULD NOT BE NULL', x[field])
-          reference.replacement[field] = x[field];
+     if (fieldName === idField) {
+       console.log('this object has an id');
+       // combine replacement with object with that id
+       const x = getReference(val);
+       let fields = Object.keys(reference.replacement);
+       //console.log('fields', fields);
+       for (field of fields) {
+         // diffField(field, val, isArray, isObject, handles)
+         let fieldHasArray = Array.isArray(reference.replacement[field].data);
+         if (!x[field]) {x[field] = setField(fieldHasArray, reference.replacement[field].type)}
+         diffField(x[field], reference.replacement[field].data, fieldHasArray, false, handles.replacement);
+         Object.assign(x[field].subscribers, reference.replacement[field].subscribers);
 
-        }
-        reference.replacement = x;
-        // go back into parent field and replace with id, check for changes
-        //console.log('5******');
-        // console.log(reference);
-        reference.parentField.data = val; // TODO this could be an issue
-        //console.log('******5');
-        if (reference.existingData !== val) {
-          Object.assign(handles.replacement, reference.parentField.subscribers);
-        };
+         // TODO - have way of making sure child parentFields have reference back up to right field
+         //console.log('SHOULD NOT BE NULL', x[field])
+         reference.replacement[field] = x[field];
 
-        // switch handles[count] to replacement handles
-        context.__live.handles[count] = handles.replacement;
+       }
+       reference.replacement = x;
+       // go back into parent field and replace with id, check for changes
+       //console.log('5******');
+       // console.log(reference);
 
-      }
+       if (!fromArray) {
+         reference.parentField.data = val; // TODO this could be an issue
+         //console.log('******5');
+         if (reference.existingData !== val) {
+           Object.assign(handles.replacement, reference.parentField.subscribers);
+         };
+       } else {
+         reference.parentField.data[index] = val; // TODO this could be an issue
+         //console.log('******5');
+         if (reference.existingData[index] !== val) {
+           Object.assign(handles.replacement, reference.parentField.subscribers);
+         };
+       }
 
-      // console.log('references', context.__live.reference);
-      console.log('handles', context.__live.handles);
-      console.log('RDL', RDL.data);
-      //console.log('val', val);
-      return val;
-    });
-  },
+       // switch handles[count] to replacement handles
+       context.__live.handles[count] = handles.replacement;
+
+     }
+
+     // console.log('references', context.__live.reference);
+     // console.log('handles', context.__live.handles);
+     // console.log('RDL', RDL.data);
+     // console.log('Query', RDL.data.Query);
+     // console.log('val', val);
+     return val;
+   });
+ },
 };
 
 function resultIsArray(type) {
-  const typeString = type.toString()
-  return (typeString[0] === '[' && typeString[typeString.length-1] === ']')
+ const typeString = type.toString()
+ return (typeString[0] === '[' && typeString[typeString.length-1] === ']')
 }
 
 function resultIsObject(type) {
-  typeObj = (resultIsArray(type)) ? type.ofType: type;
-  return (!!typeObj._typeConfig)
+ typeObj = (resultIsArray(type)) ? type.ofType: type;
+ return (!!typeObj._typeConfig)
 }
 
 // figures out context info of single object or array of objects
 function setLiveContext(typeString, isArray, val) {
-  if (!isArray) return setOneLiveContext(typeString, val._id);
-  return val.map((obj, i) => {
-    obj.live = i;
-    return setOneLiveContext(typeString, obj.id);
-  })
+ if (!isArray) return setOneLiveContext(typeString, val._id);
+ return val.map((obj, i) => {
+   obj.live = i;
+   return setOneLiveContext(typeString, obj.id);
+ })
 }
 
 // creates (if neccesary) and returns context of a single object
 function setOneLiveContext(typeString, id) {
-  if (!RDL.data[typeString]) {
-    RDL.data[typeString] = {};
-  }
-  if (!id) return RDL.data[typeString];
-  // Check if the object exists in the tree
-  if (!RDL.data[typeString][id]) {
-    RDL.data[typeString][id] = {};
-  }
-  return RDL.data[typeString][id]
+ if (!RDL.data[typeString]) {
+   RDL.data[typeString] = {};
+ }
+ if (!id) return RDL.data[typeString];
+ // Check if the object exists in the tree
+ if (!RDL.data[typeString][id]) {
+   RDL.data[typeString][id] = {};
+ }
+ return RDL.data[typeString][id]
 }
 
 function setReferences(isArray, val, field) {
-  //console.log('******1');
-  const existingData = field.data
-  //console.log('1******');
-  const data = shuffleData(isArray, field, val);
-  if (!isArray) {
-    return setReference(val, field, data, existingData);
-  }
-  return val.map((obj, i) => {
-    obj.__liveIndex = i;
-    //console.log('******4');
-    const oldData = field.data[i];
-    console.log(field, data);
-    //console.log('4******');
-    return setReference(obj, field, data[i], existingData[i]);
-  })
+ //console.log('******1');
+ const existingData = field.data
+ //console.log('1******');
+ const data = shuffleData(isArray, field, val);
+ if (!isArray) {
+   return setReference(val, field, data, existingData);
+ }
+ return val.map((obj, i) => {
+   obj.__liveIndex = i;
+   //console.log('******4');
+   const oldData = field.data[i];
+   console.log(field, data);
+   //console.log('4******');
+   return setReference(obj, field, data[i], existingData[i]);
+ })
 }
 
 function setReference(source, parentField, existing, existingData) {
-  return {
-    existing,
-    parentField,
-    existingData,
-    source,
-    replacement: {},
-    handles: {
-      existing: {},
-      replacement: {}
-    }
-  };
+ return {
+   existing,
+   parentField,
+   existingData,
+   source,
+   replacement: {},
+   handles: {
+     existing: {},
+     replacement: {}
+   }
+ };
 }
 
 function shuffleData(isArray, field, val) {
-  if (!isArray) {
-    //const data = (typeof field.data === 'object') ? field.data: {};
-    const data = {};
-    //console.log('****2')
-    field.data = data;
-    //console.log('2****')
-    return data;
-  }
-  return val.map((obj, i) => {
-    //const data = (typeof obj.data === 'object') ? obj.data: {};
-    const data = {};
-    //console.log('****3')
-    field.data[i] = data;
-    //console.log('3****')
+ if (!isArray) {
+   //const data = (typeof field.data === 'object') ? field.data: {};
+   const data = {};
+   //console.log('****2')
+   field.data = data;
+   //console.log('2****')
+   return data;
+ }
+ return val.map((obj, i) => {
+   //const data = (typeof obj.data === 'object') ? obj.data: {};
+   const data = {};
+   //console.log('****3')
+   field.data[i] = data;
+   //console.log('3****')
 
-    return data;
-  })
+   return data;
+ })
 }
 
 function getReference(identifier) {
-  if (RDL.data[identifier]) return RDL.data[identifier];
-  RDL.data[identifier] = {};
-  //console.log('xxxxxxx');
-  return RDL.data[identifier];
+ if (RDL.data[identifier]) return RDL.data[identifier];
+ RDL.data[identifier] = {};
+ //console.log('xxxxxxx');
+ return RDL.data[identifier];
 }
 
 function setField(isArray, typeString) {
-  // initialized field to default 'empty' state
-  return ({
-    data: (isArray ? [] : null),
-    subscribers: {},
-    type: typeString
-  });
+ // initialized field to default 'empty' state
+ return ({
+   data: (isArray ? [] : null),
+   subscribers: {},
+   type: typeString
+ });
 }
 
 function setFields(isArray, typeString, fieldString, reference) {
-  if (!reference.existing[fieldString]) {
-    reference.existing[fieldString] = setField(isArray, typeString)
-  }
-  if (!reference.replacement[fieldString]) {
-    reference.replacement[fieldString] = setField(isArray, typeString)
-  }
+ if (!reference.existing[fieldString]) {
+   reference.existing[fieldString] = setField(isArray, typeString)
+ }
+ if (!reference.replacement[fieldString]) {
+   reference.replacement[fieldString] = setField(isArray, typeString)
+ }
 }
 
 // compares old data to newly resolved data
 function diffField(field, val, isArray, isObject, handles) {
-  //console.log('CANNOT BE UNDEFINED', field);
-  let changed = false;
+ //console.log('CANNOT BE UNDEFINED', field);
+ let changed = false;
 
-  if (isArray) {
-    // compare each value of new data to old data
-    changed = val.reduce((acc, curr, i) => {
-      return (acc || curr !== field.data[i]);
-    }, false)
-    changed = changed || (val.length !== field.data.length);
+ if (isArray) {
+   // compare each value of new data to old data
+   changed = val.reduce((acc, curr, i) => {
+     return (acc || curr !== field.data[i]);
+   }, false)
+   changed = changed || (val.length !== field.data.length);
 
-  } else {
-    changed = (field.data !== val)
-  }
+ } else {
+   changed = (field.data !== val)
+ }
 
-  if (changed) {
-    console.log('-------------THERE WAS A CHANGE------------------')
-    field.data = val; // overwrite field
+ if (changed) {
+   console.log('-------------THERE WAS A CHANGE------------------')
+   field.data = val; // overwrite field
 
-    // add subscribers of this data to list of handls to be fired back
-    Object.assign(handles, field.subscribers);
-  }
+   // add subscribers of this data to list of handls to be fired back
+   Object.assign(handles, field.subscribers);
+ }
 }
 
 function setFieldString(fieldString, arguments) {
-  const argString = arguments.reduce((acc, curr) => {
-    const argKey = curr.name.value;
-    const argVal = (typeof curr.value.value === 'string') ? curr.value.value : JSON.stringify(curr.value.value);
-    return acc + ` ${argKey}: ${argVal}`
-  }, '');
-  return (!argString.length) ? fieldString : fieldString  + `(${argString} )`;
+ const argString = arguments.reduce((acc, curr) => {
+   const argKey = curr.name.value;
+   const argVal = (typeof curr.value.value === 'string') ? curr.value.value : JSON.stringify(curr.value.value);
+   return acc + ` ${argKey}: ${argVal}`
+ }, '');
+ return (!argString.length) ? fieldString : fieldString  + `(${argString} )`;
 }
 
 module.exports = liveResolver;

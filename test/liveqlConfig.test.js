@@ -1,18 +1,18 @@
 const liveql = require('./../src/server/liveqlConfig');
 
-const test1 = { uid: 'test1', dirStr: 'test1' };
-test('Test with uid and dirStr.', () => {
+const test1 = { uid: 'test1', directive: 'test1' };
+test('Test with uid and directive.', () => {
   liveql.setConfig(test1);
-  expect(liveql.getConfig()).toEqual({ uid: 'test1', dirStr: '@test1' });
+  expect(liveql.getConfig()).toEqual({ uid: 'test1', directive: '@test1' });
 });
 
 test('Test with no object.', () => {
   liveql.setConfig();
-  expect(liveql.getConfig()).toEqual({ uid: 'id', dirStr: '@live'})
+  expect(liveql.getConfig()).toEqual({ uid: 'id', directive: '@live'})
 });
 
-const test3 = { dirStr: '@live', noCtx: true };
+const test3 = { directive: '@live' };
 test('Test with @ in directive', () => {
   liveql.setConfig(test3);
-  expect(liveql.getConfig()).toEqual({ uid: 'id', dirStr: '@live', noCtx: true });
+  expect(liveql.getConfig()).toEqual({ uid: 'id', directive: '@live' });
 });

@@ -26,7 +26,7 @@ module.exports = (req, res, next) => {
    * If we're going to change this we need to get a name at the point
    * of config and look for it here.
    */
-  const directive = liveql.getConfig().dirStr;
+  const directive = liveql.getConfig().directive;
   if (!query.slice(0, open).includes(directive)) return next();
 
   // Get hash of query.

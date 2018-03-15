@@ -2,8 +2,7 @@
   * LiveQL Config Object:
   *  {
   *    uid: {String | Optional} - The string of the unique identifer that is returned for live objects (ex: 'live_id'). Default is 'id'.
-  *    dirStr: {String | Optional} - The string of the directive identifier (ex: @live). Just pass in the part after the @. Default is 'live'.
-  *    noCtx: {Boolean | Optional} - Set to true if you intentionally left the context blank so that the req object is passed.
+  *    directive: {String | Optional} - The string of the directive identifier (ex: @live). Just pass in the part after the @. Default is 'live'.
   *    retrieve: {Function | Optional} - A function that retrieves the RDL.
   *    deploy: {Function | Optional} - A function that deploys the RDL.
   *  }
@@ -12,7 +11,7 @@
 const liveql = {};
 
 // Store the default settings.
-liveql.default = { uid: 'id', dirStr: 'live' };
+liveql.default = { uid: 'id', directive: 'live' };
 
 // Store the LiveQL server settings.
 liveql.config = {};
@@ -25,20 +24,19 @@ liveql.config = {};
 liveql.setLiveConfig = (settings) => {
   if (!settings) {
     liveql.config.uid = 'id';
-    liveql.config.dirStr = '@live';
+    liveql.config.directive = '@live';
   } else {
     liveql.config.uid = settings.uid || liveql.default.uid;
 
     // Add the @ sign to the directive if one is passed in the object.
-    if (settings.dirStr) {
+    if (settings.directive) {
       // User included @ in front of directive.
-      if (settings.dirStr.indexOf('@') === 0) {
-        liveql.config.dirStr = settings.dirStr;
+      if (settings.directive.indexOf('@') === 0) {
+        liveql.config.directive = settings.directive;
       } else {
-        liveql.config.dirStr = '@' + settings.dirStr;
+        liveql.config.directive = '@' + settings.directive;
       }
     }
-    if (settings.noCtx) liveql.config.noCtx = settings.noCtx;
     if (settings.retrieve) liveql.config.retrieve = settings.retrieve;
     if (settings.deploy) liveql.config.deploy = settings.deploy;
   }

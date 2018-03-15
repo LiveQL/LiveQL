@@ -37,7 +37,6 @@ liveConfig.set = (settings) => {
         liveConfig.config.directive = '@' + settings.directive;
       }
     }
-    if (settings.noCtx) liveConfig.config.noCtx = settings.noCtx;
     if (settings.retrieve) liveConfig.config.retrieve = settings.retrieve;
     if (settings.deploy) liveConfig.config.deploy = settings.deploy;
   }

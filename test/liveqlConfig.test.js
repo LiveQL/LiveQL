@@ -11,8 +11,8 @@ test('Test with no object.', () => {
   expect(liveConfig.get()).toEqual({ uid: 'id', directive: '@live'});
 });
 
-const test3 = { directive: '@live', noCtx: true };
+const test3 = { directive: '@live', retrieve: 'test' };
 test('Test with @ in directive', () => {
   liveConfig.set(test3);
-  expect(liveConfig.get()).toEqual({ uid: 'id', directive: '@live', noCtx: true });
+  expect(liveConfig.get()).toEqual({ uid: 'id', directive: '@live', retrieve: 'test' });
 });

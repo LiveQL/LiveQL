@@ -6,7 +6,8 @@
  */
 module.exports = (str, vars = {}) => {
   let hash = str.slice(str.indexOf('{')).replace(/ /g, '').replace(/\r?\n|\r/g, '');
-  const variables = Object.keys(vars);
+  let variables = [];
+  if (vars) variables = Object.keys(vars);
   for (let i = 0; i < variables.length; i += 1) {
     const reg = new RegExp('\\$' + variables[i], 'g');
     hash = hash.replace(reg, vars[variables[i]]);

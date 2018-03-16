@@ -18,7 +18,8 @@ const liveConfig = require('./liveqlConfig');
  */
 module.exports = (graphqlObj) => {
   // Grab the LiveQL config object.
-  const liveqlSettings = liveConfig.get();
+  const settings = liveConfig.get();
+  if (!settings.uid) liveConfig.set();
   const liveqlObj = { ...graphqlObj };
 
   return (req, res, next) => {
@@ -27,8 +28,8 @@ module.exports = (graphqlObj) => {
     }
     liveqlObj.context.__live = {};
     liveqlObj.context.__live.handle = res.locals.handle;
-    liveqlObj.context.__live.uid = liveqlSettings.uid;
-    liveqlObj.context.__live.directive = liveqlSettings.directive;
+    liveqlObj.context.__live.uid = settings.uid;
+    liveqlObj.context.__live.directive = settings.directive;
     liveqlObj.context.__live.firstRun = true;
     if (liveqlObj.extensions) {
       // There's a function defined in extensions.
@@ -38,7 +39,7 @@ module.exports = (graphqlObj) => {
         return fn(val);
       };
     } else {
-      liveqlObj.extensions = () => console.log('Put afterResolution.js here.');
+      liveqlObj.extensions = () => console.log('Put here.');
     }
     return graphqlHTTP(liveqlObj)(req, res, next);
   };

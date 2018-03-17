@@ -7,6 +7,9 @@ const server = require('./server/liveqlServer');
 // Express middleware that processes incoming queries.
 const process = require('./server/processQuery');
 
+// Live resolver function.
+const liveResolver = require('./liveResolver');
+
 // ADD MORE FUNCTIONS!!!
 
 /**
@@ -15,4 +18,5 @@ const process = require('./server/processQuery');
  * file.
  */
 
-module.exports = { config, server, process };
+module.exports = { config, server, process, liveResolver };
+

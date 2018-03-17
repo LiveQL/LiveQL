@@ -1,7 +1,7 @@
 const liveConfig = require('./../src/server/liveqlConfig');
 
 const test1 = { uid: 'test1', directive: 'test1' };
-test('Test with uid and dirStr.', () => {
+test('Test with uid and directive.', () => {
   liveConfig.set(test1);
   expect(liveConfig.get()).toEqual({ uid: 'test1', directive: '@test1' });
 });

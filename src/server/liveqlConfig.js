@@ -8,43 +8,42 @@
   *  }
 */
 
-const liveConfig = {};
+// Store the LiveQL server settings.
+const config = {};
 
 // Store the default settings.
-liveConfig.default = { uid: 'id', directive: 'live' };
-
-// Store the LiveQL server settings.
-liveConfig.config = {};
+const defaultSettings = { uid: 'id', directive: '@live' };
 
 /**
  * This function sets the LiveQL config object.
  * @param {Object} settings - User settings object.
  * @returns {Object} - LiveQL settings object.
  */
-liveConfig.set = (settings) => {
+const set = (settings) => {
   if (!settings) {
-    liveConfig.config.uid = 'id';
-    liveConfig.config.directive = '@live';
+    config.uid = 'id';
+    config.directive = '@live';
   } else {
-    liveConfig.config.uid = settings.uid || liveConfig.default.uid;
+    config.uid = settings.uid || defaultSettings.uid;
 
     // Add the @ sign to the directive if one is passed in the object.
     if (settings.directive) {
       // User included @ in front of directive.
       if (settings.directive.indexOf('@') === 0) {
-        liveConfig.config.directive = settings.directive;
+        config.directive = settings.directive;
       } else {
-        liveConfig.config.directive = '@' + settings.directive;
+        config.directive = '@' + settings.directive;
       }
+    } else {
+      config.directive = '@live';
     }
-    if (settings.retrieve) liveConfig.config.retrieve = settings.retrieve;
-    if (settings.deploy) liveConfig.config.deploy = settings.deploy;
+    if (settings.retrieve) config.retrieve = settings.retrieve;
+    if (settings.deploy) config.deploy = settings.deploy;
   }
-  return liveConfig.config;
+  return config;
 };
 
 // Return the config object.
-liveConfig.get = () => liveConfig.config;
+const get = () => config;
 
-module.exports = { set: liveConfig.set, get: liveConfig.get };
-
+module.exports = { set, get };

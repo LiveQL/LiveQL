@@ -160,7 +160,6 @@ const RDL = require('./reactiveDataLayer');
      // console.log('val', val);
      return val;
    });
- },
 };
 
 function resultIsArray(type) {

@@ -32,12 +32,6 @@ module.exports = (req, res, next) => {
   if (subscriptions[hash]) {
     subscriptions[hash].listeners += 1;
   } else {
-    // If the query was sent with variables, replace them in the stored query.
-    // if (variables) variables = Object.keys(vars);
-    // for (let i = 0; i < variables.length; i += 1) {
-    //   const reg = new RegExp('\\$' + variables[i], 'g');
-    //   hash = hash.replace(reg, vars[variables[i]]);
-    // }
     subscriptions[hash] = { query, variables, listeners: 1 };
   }
 

@@ -17,8 +17,7 @@ const RDL = require('./reactiveDataLayer');
 
  // conte
 
- const liveResolver = (resolve, source, args, context, info) => {
-
+const liveResolver = (resolve, source, args, context, info) => {
   // return resolve().then((val) => {return val});
   if (!context.__live) {
     console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)

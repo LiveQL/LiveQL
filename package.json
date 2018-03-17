@@ -30,6 +30,8 @@
     "jest-cli": "22.4.2"
   },
   "dependencies": {
+    "apollo-server-express": "1.3.2",
+    "graphql": "0.13.2",
     "graphql-tools": "2.21.0",
     "socket.io": "2.0.4"
   }

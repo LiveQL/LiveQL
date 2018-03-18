@@ -24,15 +24,15 @@ Please submit issues/pull requests if you have feedback or message the LiveQL te
 
 ## Authors
 
-* **Andrew Fuselier** - [https://github.com/andrewlarry](andrewlarry)
+* **Andrew Fuselier** - [andrewlarry](https://github.com/andrewlarry)
 
-* **Max White** - [https://github.com/meIIow](meIIow)
+* **Max White** - [meIIow](https://github.com/meIIow)
 
-* **Skylar Escobedo** - [https://github.com/NewSky54](NewSky54)
+* **Skylar Escobedo** - [NewSky54](https://github.com/NewSky54)
 
-* **Eric Carrillo** - [https://github.com/saltyandsmiling](saltyandsmiling)
+* **Eric Carrillo** - [saltyandsmiling](https://github.com/saltyandsmiling)
 
-* **Xavyr Moss** - [https://github.com/Xavyr](Xavyr)
+* **Xavyr Moss** - [Xavyr](https://github.com/Xavyr)
 
 ## License
 

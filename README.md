@@ -8,7 +8,7 @@ LiveQL is most similar to the subscription model. The difference is that instead
 Check out our [wiki](https://github.com/LiveQL/LiveQL/wiki) for more details and documentation!
 
 ## Getting Started
-Install the package:
+Install the [package](https://www.npmjs.com/package/liveql):
 ```
 npm install liveql --save
 ```

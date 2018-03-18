@@ -14,10 +14,7 @@ const RDL = require('./reactiveDataLayer');
  * @param {Object} info - Object that stores GraphQL query and schema info.
  */
 
-
- // conte
-
-const liveResolver = (resolve, source, args, context, info) => {
+function liveResolver(resolve, source, args, context, info) {
   // return resolve().then((val) => {return val});
   if (!context.__live) {
     console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)

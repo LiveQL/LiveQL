@@ -1,6 +1,6 @@
 {
   "name": "liveql",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "LiveQL library for live queries in GraphQL.",
   "main": "src/package.js",
   "directories": {
@@ -9,7 +9,7 @@
   "scripts": {
     "test": "jest",
     "prepublish": "npm run build",
-    "build": "babel --presets es2015 -d lib/ src/"
+    "build": "babel --presets es2015,stage-0,env -d lib/ src/"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,9 @@
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "6.26.0",
+    "babel-preset-env": "1.6.1",
     "babel-preset-es2015": "6.24.1",
+    "babel-preset-stage-0": "6.24.1",
     "eslint": "4.18.2",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-plugin-import": "2.9.0",

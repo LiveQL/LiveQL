@@ -23,4 +23,3 @@ const client = require('./liveql/liveqlClient')
 
 module.exports = { config, server, process, liveResolver, client };
 
-

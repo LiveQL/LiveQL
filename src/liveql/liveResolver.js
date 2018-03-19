@@ -188,13 +188,13 @@ function liveResolver(resolve, source, args, context, info) {
 };
 
 function resultIsArray(type) {
-const typeString = type.toString()
-return (typeString[0] === '[' && typeString[typeString.length-1] === ']')
+  const typeString = type.toString()
+  return (typeString[0] === '[' && typeString[typeString.length-1] === ']')
 }
 
 function resultIsObject(type) {
-typeObj = (resultIsArray(type)) ? type.ofType: type;
-return (!!typeObj._typeConfig)
+  const typeObj = (resultIsArray(type)) ? type.ofType: type;
+  return (!!typeObj._typeConfig)
 }
 
 // figures out context info of single object or array of objects

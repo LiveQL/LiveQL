@@ -36,13 +36,12 @@ module.exports = (graphqlObj) => {
       // There's already a function defined in formatResponse.
       const fn = liveqlObj.formatResponse;
       liveqlObj.formatResponse = (val) => {
-        // Pass the queue into the post function. Might need to pass in the handle as well
-        // so that it can attach the handle to the response.
-        post(val, res.locals.queue);
+        // Pass the queue and the hashed query to the formatResponse function.
+        post(val, res.locals.queue, res.locals.handle);
         return fn(val);
       };
     } else {
-      liveqlObj.formatResponse = val => post(val);
+      liveqlObj.formatResponse = val => post(val, res.locals.queue, res.locals.handle);
     }
     return graphqlExpress(liveqlObj)(req, res, next);
   };

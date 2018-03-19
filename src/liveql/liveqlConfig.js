@@ -3,8 +3,6 @@
   *  {
   *    uid: {String | Optional} - The string of the unique identifer that is returned for live objects (ex: 'live_id'). Default is 'id'.
   *    directive: {String | Optional} - The string of the directive identifier (ex: @live). Just pass in the part after the @. Default is 'live'.
-  *    retrieve: {Function | Optional} - A function that retrieves the RDL.
-  *    deploy: {Function | Optional} - A function that deploys the RDL.
   *  }
 */
 
@@ -37,8 +35,6 @@ const set = (settings) => {
     } else {
       config.directive = '@live';
     }
-    if (settings.retrieve) config.retrieve = settings.retrieve;
-    if (settings.deploy) config.deploy = settings.deploy;
   }
   return config;
 };

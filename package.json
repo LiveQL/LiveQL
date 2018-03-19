@@ -1,6 +1,6 @@
 {
   "name": "liveql",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "LiveQL library for live queries in GraphQL.",
   "main": "lib/package.js",
   "directories": {

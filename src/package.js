@@ -11,7 +11,7 @@ const process = require('./liveql/processQuery');
 const liveResolver = require('./liveql/liveResolver');
 
 // Client functions.
-const client = require('./liveql/liveqlClient')
+const client = require('./liveql/liveqlClient');
 
 // ADD MORE FUNCTIONS!!!
 

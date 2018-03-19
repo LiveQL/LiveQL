@@ -2,7 +2,7 @@
   "name": "liveql",
   "version": "0.1.4",
   "description": "LiveQL library for live queries in GraphQL.",
-  "main": "src/package.js",
+  "main": "lib/package.js",
   "directories": {
     "test": "test"
   },

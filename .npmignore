@@ -1,6 +1,6 @@
 # Ignore src and test folders
-src
-test
+src/
+test/
 
 #build tools
 .travis.yml

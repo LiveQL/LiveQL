@@ -1,4 +1,4 @@
-const hash = require('./../src/server/queryHash');
+const hash = require('./../src/liveql/queryHash');
 
 /**
  * Mock query strings for testing.

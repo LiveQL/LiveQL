@@ -1,7 +1,7 @@
-const processQuery = require('./../src/server/processQuery');
-const queryHash = require('./../src/server/queryHash');
-const { subscriptions } = require('./../src/server/reactiveDataLayer');
-const liveConfig = require('./../src/server/liveqlConfig');
+const processQuery = require('./../src/liveql/processQuery');
+const queryHash = require('./../src/liveql/queryHash');
+const { subscriptions } = require('./../src/liveql/reactiveDataLayer');
+const liveConfig = require('./../src/liveql/liveqlConfig');
 
 liveConfig.set();
 // Setup fake req, res, subscriptions, and next variables.

@@ -1,4 +1,4 @@
-const liveConfig = require('./../src/server/liveqlConfig');
+const liveConfig = require('./../src/liveql/liveqlConfig');
 
 const test1 = { uid: 'test1', directive: 'test1' };
 test('Test with uid and directive.', () => {

@@ -36,6 +36,9 @@ module.exports = (graphqlObj) => {
       // There's already a function defined in formatResponse.
       const fn = liveqlObj.formatResponse;
       liveqlObj.formatResponse = (val) => {
+        /**
+         * Using res.locals.queue as the location for the queue.
+         */
         post(val, res.locals.queue);
         return fn(val);
       };

@@ -28,16 +28,21 @@ module.exports = (req, res, next) => {
   // Get hash of query.
   const hash = queryHash(query, variables);
 
+  // Regex to strip out directive.
+  const reg = new RegExp(directive, 'g');
+
   // There's at least one subscriber on this query.
   if (subscriptions[hash]) {
     subscriptions[hash].listeners += 1;
   } else {
+    query = query.replace(reg, '');
     subscriptions[hash] = { query, variables, listeners: 1 };
   }
 
   // Store the handle for this user in res.locals.handle.
   res.locals.handle = hash;
-
+  // Strip directive from query. 
+  req.body.query = req.body.query.replace(reg, '');
   return next();
 };
 

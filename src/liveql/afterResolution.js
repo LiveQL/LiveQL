@@ -8,4 +8,5 @@ const RDL = require('./reactiveDataLayer');
  */
 module.exports = (response) => {
   // if RDL.queue has people do stuff
+  return response;
 };

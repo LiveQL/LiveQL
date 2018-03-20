@@ -1,6 +1,6 @@
 
 const liveConfig = require('./liveqlConfig');
-const post = require('./afterResolution');
+const { afterQuery } = require('./liveqlResponse');
 const { graphqlExpress } = require('apollo-server-express');
 
 /**
@@ -37,11 +37,11 @@ module.exports = (graphqlObj) => {
       const fn = liveqlObj.formatResponse;
       liveqlObj.formatResponse = (val) => {
         // Pass the queue and the hashed query to the formatResponse function.
-        post(val, res.locals.queue, res.locals.handle);
+        afterQuery(val, res.locals.queue, res.locals.handle);
         return fn(val);
       };
     } else {
-      liveqlObj.formatResponse = val => post(val, res.locals.queue, res.locals.handle);
+      liveqlObj.formatResponse = val => afterQuery(val, res.locals.queue, res.locals.handle);
     }
     return graphqlExpress(liveqlObj)(req, res, next);
   };

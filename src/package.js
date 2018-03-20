@@ -1,25 +1,20 @@
 // Object with get and set methods.
-const config = require('./liveql/liveqlConfig');
+const liveqlConfig = require('./liveql/liveqlConfig');
 
 // Function that sets up LiveQL server.
-const server = require('./liveql/liveqlServer');
+const liveqlServer = require('./liveql/liveqlServer');
 
 // Express middleware that processes incoming queries.
-const process = require('./liveql/processQuery');
+const liveqlProcess = require('./liveql/liveqlProcess');
 
 // Live resolver function.
-const liveResolver = require('./liveql/liveResolver');
+const liveqlResolver = require('./liveql/liveqlResolver');
 
 // Client functions.
-const client = require('./liveql/liveqlClient');
+const liveqlClient = require('./liveql/liveqlClient');
 
-// ADD MORE FUNCTIONS!!!
+// Server socket setup function.
+const { liveqlSocket } = require('./liveql/liveqlSocket');
 
-/**
- * This will serve as the entry point for the npm module. When
- * someone require('liveql') they will get the export from this
- * file.
- */
-
-module.exports = { config, server, process, liveResolver, client };
+module.exports = { liveqlConfig, liveqlServer, liveqlProcess, liveqlResolver, liveqlClient, liveqlSocket };
 

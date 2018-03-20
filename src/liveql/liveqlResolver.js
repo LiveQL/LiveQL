@@ -20,6 +20,7 @@ const RDL = require('./reactiveDataLayer');
 const liveResolver = (resolve, source, args, context, info) => {
 
   // return resolve().then((val) => {return val});
+
   // assign 'live' alias
   let live = initializeLive(context);
 
@@ -176,11 +177,9 @@ function setToID(val, reference, handles, live, count) {
   console.log('this object has an id');
   // combine replacement with object with that id
   const x = getReference(val);
-  console.log('what is x, man?', x);
   let fields = Object.keys(reference.replacement);
-  console.log('fields', fields);
+  //console.log('fields', fields);
   for (field of fields) {
-    console.log('YYYYYYYYYYYYYYYYYYYYYY', reference.replacement[field]);
     // diffField(field, val, isArray, isObject, handles)
     let fieldHasArray = Array.isArray(reference.replacement[field].data);
     if (!x[field]) {x[field] = setField(fieldHasArray, reference.replacement[field].type)}
@@ -189,13 +188,10 @@ function setToID(val, reference, handles, live, count) {
 
     // TODO - have way of making sure child parentFields have reference back up to right field
     //console.log('SHOULD NOT BE NULL', x[field])
-    //reference.replacement[field] = x[field];
+    reference.replacement[field] = x[field];
 
   }
-  console.log('[][][][][][][][][][][][][][][][][][[][][][][][][]]')
-  console.log(  reference.replacement);
   reference.replacement = x;
-  console.log(  reference.replacement);
   // go back into parent field and replace with id, check for changes
   console.log('5******');
   // console.log(reference);
@@ -230,12 +226,10 @@ function checkReference(reference, live, source) {
       // console.log('source', source);
       return false;
     } else {
-      console.log('BEGINNING TO RESOLVE FIELDS ON NEW OBJECT');
       live.referenceCount ++;
       return reference;
     }
   }
-  console.log('CONTINUING TO RESOLVE FIELDS ON OBJECT');
   return reference;
 }
 

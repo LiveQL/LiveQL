@@ -22,7 +22,9 @@ module.exports = (req, res, next) => {
   if (open !== 0 && !query.slice(0, open).includes('query')) return next();
 
   // Grab the direcive defined in the LiveQL settings.
-  const { directive } = liveConfig.get();
+  let config = liveConfig.get();
+  if (!config.directive) config = liveConfig.set();
+  const { directive } = config;
   if (!query.slice(0, open).includes(directive)) return next();
 
   // Get hash of query.
@@ -41,7 +43,7 @@ module.exports = (req, res, next) => {
 
   // Store the handle for this user in res.locals.handle.
   res.locals.handle = hash;
-  // Strip directive from query. 
+  // Strip directive from query.
   req.body.query = req.body.query.replace(reg, '');
   return next();
 };

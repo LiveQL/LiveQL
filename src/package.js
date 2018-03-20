@@ -13,5 +13,8 @@ const liveqlResolver = require('./liveql/liveqlResolver');
 // Client functions.
 const liveqlClient = require('./liveql/liveqlClient');
 
-module.exports = { liveqlConfig, liveqlServer, liveqlProcess, liveqlResolver, liveqlClient };
+// Server socket setup function.
+const { liveqlSocket } = require('./liveql/liveqlSocket');
+
+module.exports = { liveqlConfig, liveqlServer, liveqlProcess, liveqlResolver, liveqlClient, liveqlSocket };
 

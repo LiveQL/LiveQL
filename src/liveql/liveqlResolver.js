@@ -25,9 +25,9 @@ const liveResolver = (resolve, source, args, context, info) => {
   let live = initializeLive(context);
 
   // do these all need to be variables?
-  const handle = 'I AM A HANDLE' //live.handle || '';
-  const alias = 'live' //live.directive;
-  const idField = 'id' //live.uid;
+  const handle = live.handle || '';
+  const alias = live.directive;
+  const idField = live.uid;
   const mutation = false;
   const del = (!! args.del);
 
@@ -117,7 +117,7 @@ const liveResolver = (resolve, source, args, context, info) => {
     // console.log('references', live.reference);
     // console.log('handles', live.handles);
   //  if (RDL.store['5a9b26de4d33148fb6718929']) {
-      console.log('RDL', RDL.store);
+      // console.log('RDL', RDL.store);
     //}
 
     if (del) {
@@ -259,7 +259,7 @@ function resultIsArray(type) {
 }
 
 function resultIsObject(type) {
-  typeObj = (resultIsArray(type)) ? type.ofType: type;
+  const typeObj = (resultIsArray(type)) ? type.ofType: type;
   return (!!typeObj._typeConfig)
 }
 

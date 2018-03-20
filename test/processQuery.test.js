@@ -1,4 +1,4 @@
-const processQuery = require('./../src/liveql/processQuery');
+const processQuery = require('./../src/liveql/liveqlProcess');
 const queryHash = require('./../src/liveql/queryHash');
 const { subscriptions } = require('./../src/liveql/reactiveDataLayer');
 const liveConfig = require('./../src/liveql/liveqlConfig');

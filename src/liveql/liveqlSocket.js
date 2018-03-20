@@ -70,8 +70,9 @@ liveSocket.emit = (schema) => {
  * @param {Object} queue - The queue of users that need to be notified of changes.
  * @param {String} handle - The handle of the client. Needs to be passed back in the response.
  */
-module.exports = (queue) => {
-	//Loop through queue;
-	if (!queue) return;
+
+function afterQuery(queue) {
+	console.log(queue);
 	return;
-};
+}
+module.exports = { afterQuery, liveqlSocket: liveSocket.initialize };

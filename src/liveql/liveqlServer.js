@@ -36,28 +36,32 @@ module.exports = (graphqlObj) => {
     res.locals.queue = [];
     liveqlObj.context.__live.queue = res.locals.queue;
 
+    /**
+     * THIS IS A BUG. FIX ME?
+     */
     // If the user is already using the formatResponse function.
-    if (liveqlObj.formatResponse) {
-      // There's already a function defined in formatResponse.
-      const fn = liveqlObj.formatResponse;
-      liveqlObj.formatResponse = (val) => {
-        // Check if this is a live query and add the handle to response.
-        if (liveqlObj.context.__live.handle) {
-          val.handle = liveqlObj.context.__live.handle;
-        };
-        // Pass the queue and the hashed query to the formatResponse function.
-        afterQuery(res.locals.queue);
-        return fn(val);
-      };
-    } else {
-      liveqlObj.formatResponse = (val) => {
-        if (liveqlObj.context.__live.handle) {
-          val.handle = liveqlObj.context.__live.handle;
-        }
-        afterQuery(res.locals.queue);
-        return val;
-      };
-    }
+    // if (liveqlObj.formatResponse) {
+    //   // There's already a function defined in formatResponse.
+    //   const fn = liveqlObj.formatResponse;
+    //   liveqlObj.formatResponse = (val) => {
+    //     // Check if this is a live query and add the handle to response.
+    //     if (liveqlObj.context.__live.handle) {
+    //       val.handle = liveqlObj.context.__live.handle;
+    //     };
+    //     // Pass the queue and the hashed query to the formatResponse function.
+    //     // Pass in res.locals.mutation
+    //     afterQuery(res.locals.queue, res.locals.mutation);
+    //     return fn(val);
+    //   };
+    // } else {
+    liveqlObj.formatResponse = (val) => {
+      if (liveqlObj.context.__live.handle) {
+        val.handle = liveqlObj.context.__live.handle;
+      }
+      afterQuery(res.locals.queue, res.locals.mutation);
+      return val;
+    };
+    // }
     return graphqlExpress(liveqlObj)(req, res, next);
   };
 };

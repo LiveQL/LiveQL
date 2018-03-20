@@ -102,7 +102,6 @@ const liveResolver = (resolve, source, args, context, info) => {
       // console.log('QWQWQWQWQWQWQWQWQWQWQW', reference.existing);
     };
 
->>>>>>> e036187b91ba60b3fdbe0e31dcc4066e52226d23
     reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
     reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
 
@@ -111,7 +110,6 @@ const liveResolver = (resolve, source, args, context, info) => {
     if (fieldName === idField) {
       setToID(val, reference, handles, live, count);
     }
->>>>>>> e036187b91ba60b3fdbe0e31dcc4066e52226d23
     if (del) {
       handles.existing = Object.assign( handles.existing, reference.existing[fieldString].subscribers);
       handles.replacement = Object.assign( handles.replacement, reference.replacement[fieldString].subscribers);
@@ -162,7 +160,7 @@ const liveResolver = (resolve, source, args, context, info) => {
 function setToID(val, reference, handles, live, count) {
   let id = (typeof val === 'string') ? val : JSON.stringify(val);
   console.log('this object has an id');
->>>>>>> db04b628f30f2d48b3c83ad76ffc8c3841acb65f
+
   // combine replacement with object with that id
   const transfer = getReference(id);
   let fields = Object.keys(reference.replacement);
@@ -192,7 +190,7 @@ function setToID(val, reference, handles, live, count) {
     if (reference.existingData[reference.parentIndex] !== id) {
       Object.assign(handles.replacement, reference.parentField.subscribers);
     };
-    reference.parentIndex ++;
+    reference.parentIndex++;
   }
 
   // switch handles[count] to replacement handles

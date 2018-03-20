@@ -70,7 +70,8 @@ liveSocket.emit = (schema) => {
  * @param {String} handle - The handle of the client. Needs to be passed back in the response.
  */
 
-function afterQuery(queue) {
+function afterQuery(queue, mutation) {
+  console.log('mutation', mutation);
 	console.log(queue);
 	return;
 }

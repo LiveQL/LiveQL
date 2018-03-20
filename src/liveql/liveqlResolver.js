@@ -24,7 +24,7 @@ const liveResolver = (resolve, source, args, context, info) => {
   let live = initializeLive(context);
 
   // do these all need to be variables?
-  const handle = live.handle || 'Temporary Handle';
+  const handle = live.handle; // || 'Temporary Handle';
   const alias = live.directive || 'live';
   const idField = live.uid || 'id';
   const mutation = live.mutation;
@@ -32,6 +32,7 @@ const liveResolver = (resolve, source, args, context, info) => {
 
   // if this is neither a mutation nor live query, resolve without doing anything
   if (!handle && !mutation) {return resolve().then((val) => {return val})};
+
 
   // if this this is the first resolver to be called, set parameters to default
   if (!live.resolverCount) { setLiveDefaults(live) };
@@ -103,6 +104,8 @@ const liveResolver = (resolve, source, args, context, info) => {
 
     reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
     reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
+
+    console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
 
     if (fieldName === idField) {
       setToID(val, reference, handles, live, count);
@@ -205,7 +208,6 @@ function checkReference(reference, live, source) {
       return reference;
     }
   }
-  console.log('CONTINUING TO RESOLVE FIELDS ON OBJECT');
   return reference;
 }
 

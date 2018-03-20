@@ -1,14 +1,17 @@
 // Object with get and set methods.
-const config = require('./server/liveqlConfig');
+const config = require('./liveql/liveqlConfig');
 
 // Function that sets up LiveQL server.
-const server = require('./server/liveqlServer');
+const server = require('./liveql/liveqlServer');
 
 // Express middleware that processes incoming queries.
-const process = require('./server/processQuery');
+const process = require('./liveql/processQuery');
 
 // Live resolver function.
-const liveResolver = require('./liveResolver');
+const liveResolver = require('./liveql/liveResolver');
+
+// Client functions.
+const client = require('./liveql/liveqlClient');
 
 // ADD MORE FUNCTIONS!!!
 
@@ -18,5 +21,5 @@ const liveResolver = require('./liveResolver');
  * file.
  */
 
-module.exports = { config, server, process, liveResolver };
+module.exports = { config, server, process, liveResolver, client };
 

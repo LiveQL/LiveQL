@@ -14,326 +14,389 @@ const RDL = require('./reactiveDataLayer');
  * @param {Object} info - Object that stores GraphQL query and schema info.
  */
 
-function liveResolver(resolve, source, args, context, info) {
-  // return resolve().then((val) => {return val});
-  if (!context.__live) {
-    console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)
-    context.__live = {};
-  }
 
-  // reassign to 'live' alias
-  let live = context.__live;
+ // conte
 
-  const handle = 'I AM A HANDLE' //live.handle || '';
-  const alias = 'live' //live.directive;
-  const idField = 'id' //live.uid;
+const liveResolver = (resolve, source, args, context, info) => {
 
-  // if this this is the first resolver to be called, set parameters to default
-  if (!live.resolverCount) {
+     // return resolve().then((val) => {return val});
 
-    // keeps track of how many times this liveResolver has been called so far
-    live.resolverCount = 0;
+     // assign 'live' alias
+     let live = initializeLive(context);
 
-    // keeps track of how many times we've moved on to the next reference
-    live.referenceCount = 0;
+     // do these all need to be variables?
+     const handle = 'I AM A HANDLE' //live.handle || '';
+     const alias = 'live' //live.directive;
+     const idField = 'id' //live.uid;
+     const mutation = false;
+     const del = (!! args.del);
 
-    // list of all reference objects, iterate through like a queue
-    live.references = [];
+     // if this is neither a mutation nor live query, resolve without doing anything
+     if (!handle && !mutation) {return resolve().then((val) => {return val})};
 
-    // list of all subscriber handles that have been changed
-    live.handles = [];
-  }
+     // if this this is the first resolver to be called, set parameters to default
+     if (!live.resolverCount) { setLiveDefaults(live) };
 
-  // increment and set to local variable, will stay the same even if live.resolverCount is incremented elsewhere
-  const count = live.resolverCount++;
+     // increment and set to local variable, will stay the same even if live.resolverCount is incremented elsewhere
+     const count = live.resolverCount++;
 
-  // The GraphQL type that will be returned from the resolver
-  const type = info.returnType;
+     // The GraphQL type that will be returned from the resolver
+     const type = info.returnType;
 
-  // booleans keeping track of whether the resolved value will be an array and/or contain objects
-  const isArray = resultIsArray(type);
-  const isObject = resultIsObject(type);
+     // booleans keeping track of whether the resolved value will be an array and/or contain objects
+     const isArray = resultIsArray(type);
+     const isObject = resultIsObject(type);
 
-  // GraphQL type as String
-  let typeString = type.toString();
-  // strip off [ ] if it's an array
-  if (isArray) {typeString = typeString.substring(1, typeString.length - 1)};
+     // GraphQL type as String
+     let typeString = type.toString();
+     // strip off [ ] if it's an array
+     if (isArray) {typeString = typeString.substring(1, typeString.length - 1)};
 
-  // The GraphQL type as a String that the parent field resolved to
-  const parentString = info.parentType.toString();
+     // The GraphQL type as a String that the parent field resolved to
+     const parentString = info.parentType.toString();
 
-  const fieldName = info.fieldName;
-  let fieldString = setFieldString(fieldName, info.fieldNodes[0].arguments);
+     const fieldName = info.fieldName;
+     let fieldString = setFieldString(fieldName, info.fieldNodes[0].arguments);
 
-  // is this resolver run on a top-level field?
-  const rootResolver = (parentString === 'Query' || parentString === 'Mutation')
+     // is this resolver run on a top-level field?
+     const rootResolver = (parentString === 'Query' || parentString === 'Mutation')
 
-  // the resolved value is an orphan if no parent set a reference point for it
-  let orphan = false;
+     // reference keeps track of where we are within the RDL. It stores references to objects
+     let reference = live.references[live.referenceCount];
 
-  // reference keeps track of where we are within the RDL. It stores references to objects
-  let reference = live.references[live.referenceCount];
+     // the resolved value is an orphan if no parent set a reference point for it
+     const orphan = isOrphan(reference, live, source);
 
-  if (!reference) {
-    orphan = true;
-  } else if (reference.source !== source) {
-    reference = live.references[live.referenceCount+1];
-    if (!reference || reference.source !== source) {
-      console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
-      // if (reference) console.log('reference.source', reference.source);
-      // console.log('source', source);
-      orphan = true;
-    } else {
-      live.referenceCount ++;
-    }
-  }
+     if (!rootResolver && orphan) {
+       console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
+       console.log('Or maybe you\'re a hacker tryn\'a subscribe within fields you aren\'t s\'posta. Naughty.');
+       return resolve().then((val) => {return val});
+     }
 
-  if (rootResolver || orphan) {
-    reference = setReference(source, null, getReference(parentString), null);
-  }
+     if (rootResolver) {
+       reference = setReference(source, null, getReference(parentString), null);
+     }
 
-  // stores existingHandles and replacementHandles
-  // when a subscriber's data is changed, add them to corresponding handle
-  let handles = reference.handles;
+     // stores existingHandles and replacementHandles
+     // when a subscriber's data is changed, add them to corresponding handle
+     let handles = reference.handles;
 
-  // live.handles is growing array of subscribers whose data has been changed, indexed by resolver count
-  live.handles[count] = handles.existing;
+     // live.handles is growing array of subscribers whose data has been changed, indexed by resolver count
+     live.handles[count] = handles.existing;
 
-  //console.log('outer resolve', reference)
+     //console.log('outer resolve', reference)
 
-  return resolve().then((val) => {
-    // console.log('inner resolve', reference)
+     return resolve().then((val) => {
+       // console.log('inner resolve', reference)
+       setFields(isArray, typeString, fieldString, reference);
+
+       // KEEP CHILD POINTED TO RIGHT PARENTSTRING
+       if (isObject) {
+
+         //(isArray, val, field)
+         //console.log('YYYYYYYY', reference.existing[fieldString]);
+         reference.replacement[fieldString] = reference.existing[fieldString];
+         setReferences(isArray, val, reference.existing[fieldString], live);
+         //console.log('-------object reset refs---------', live.reference);
+       } else {
+
+         //field, val, isArray, isObject, handles
+         diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
+         diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
+       };
+
+       //console.log('set context');
+
+       reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
+       reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
+
+       if (fieldName === idField) {
+         setToID(val, reference, handles, live, count);
+       }
+
+       // console.log('references', live.reference);
+       // console.log('handles', live.handles);
+     //  if (RDL.store['5a9b26de4d33148fb6718929']) {
+         console.log('RDL', RDL.store);
+       //}
+
+       if (del) {
+         handles.existing = Object.assign( handles.existing, reference.existing[fieldString].subscribers);
+         handles.replacement = Object.assign( handles.replacement, reference.replacement[fieldString].subscribers);
+       }
+       // console.log('Query', RDL.store.Query);
+       // console.log('val', val);
+
+       return val;
+     });
+   },
+ };
+
+ /*
+   Skeleton of reference object
+   {
+     source: {...} // reference to what the source of this child field is
+     existing: {...} // object you're building in case this is nested
+     replacement: {...} / object you're building in case you gotta combine with / make new top-level RDL object
+     existingData: // current values of parentField, for diffing
+     parentField: // reference back to the object within parent containing references to current data
+     handles: {
+       replacement: {...} // handles if we end up replacing
+       existing: {...} // default handles if we don't end up replacing
+     }
+   }
+
+   Skeleton of live object
+   {
+     references: [{...}, {...}, ...] // each object in references is a reference object
+     resolverCount: int // keeps track of how many live resolvers have run
+     referenceCount: int //  keeps track of which index to reference to in references
+     nestedCount: int // keeps track of number of unresolved id fields
+     directive: // the alias of the live directive
+     handle: string // the hashed identifier for a specific subscription
+     uid: string // the field name of their special id variable
+   }
+
+   Skeleton of RDL object
+   uniquIDStringdjkfsajk: {
+     field: {
+       data: [...] or scalar or {...}
+       subscribers: {sub1: true, sub2: true, ...}
+       type:
+       ids: bool ???
+     }
+   }
+ */
 
 
-    setFields(isArray, typeString, fieldString, reference);
+ function setToID(val, reference, handles, live, count) {
+   console.log('this object has an id');
+   // combine replacement with object with that id
+   const x = getReference(val);
+   let fields = Object.keys(reference.replacement);
+   //console.log('fields', fields);
+   for (field of fields) {
+     // diffField(field, val, isArray, isObject, handles)
+     let fieldHasArray = Array.isArray(reference.replacement[field].data);
+     if (!x[field]) {x[field] = setField(fieldHasArray, reference.replacement[field].type)}
+     diffField(x[field], reference.replacement[field].data, fieldHasArray, false, handles.replacement);
+     Object.assign(x[field].subscribers, reference.replacement[field].subscribers);
 
-    // looks for differences between existing data and new data
-    // diffField(store[field], val, isArray, isObject, handles);
+     // TODO - have way of making sure child parentFields have reference back up to right field
+     //console.log('SHOULD NOT BE NULL', x[field])
+     reference.replacement[field] = x[field];
 
-    //console.log('set fields');
+   }
+   reference.replacement = x;
+   // go back into parent field and replace with id, check for changes
+   console.log('5******');
+   // console.log(reference);
 
-    // sets context for nested resolvers
+   if (!Array.isArray(reference.parentField.data)) {
+     console.log('not arr');
+     reference.parentField.data = val; // TODO this could be an issue
+     console.log('******5');
+     if (reference.existingData !== val) {
+       Object.assign(handles.replacement, reference.parentField.subscribers);
+     };
+   } else {
+     console.log('arr', val, reference.parentIndex);
+     reference.parentField.data[reference.parentIndex] = val; // TODO this could be an issue
+     console.log('******5');
+     if (reference.existingData[reference.parentIndex] !== val) {
+       Object.assign(handles.replacement, reference.parentField.subscribers);
+     };
+     reference.parentIndex ++;
+   }
 
-    // KEEP CHILD POINTED TO RIGHT PARENTSTRING
-    if (isObject) {
+   // switch handles[count] to replacement handles
+   live.handles[count] = handles.replacement;
+ }
 
-      //(isArray, val, field)
-      //console.log('YYYYYYYY', reference.existing[fieldString]);
-      reference.replacement[fieldString] = reference.existing[fieldString];
-      setReferences(isArray, val, reference.existing[fieldString], live);
-      //console.log('-------object reset refs---------', live.reference);
-    } else {
+ function isOrphan(reference, live, source) {
+   if (!reference) { return true; };
+   if (reference.source !== source) {
+     reference = live.references[live.referenceCount+1];
+     if (!reference || reference.source !== source) {
+       // if (reference) console.log('reference.source', reference.source);
+       // console.log('source', source);
+       return true;
+     } else {
+       live.referenceCount ++;
+       return false;
+     }
+   }
+   return false;
+ }
 
-      //field, val, isArray, isObject, handles
-      diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
-      diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
-    };
+ function initializeLive(context) {
+   if (!context.__live) {
+     console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)
+     console.log('next time run your queries through our Middleware!')
+     context.__live = {};
+   }
+   return context.__live;
+ }
 
-    //console.log('set context');
+ function setLiveDefaults(live) {
+   // keeps track of how many times this liveResolver has been called so far
+   live.resolverCount = 0;
 
-    reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
-    reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
+   // keeps track of how many times we've moved on to the next reference
+   live.referenceCount = 0;
 
-    if (fieldName === idField) {
-      console.log('this object has an id');
-      // combine replacement with object with that id
-      const x = getReference(val);
-      let fields = Object.keys(reference.replacement);
-      //console.log('fields', fields);
-      for (field of fields) {
-        // diffField(field, val, isArray, isObject, handles)
-        let fieldHasArray = Array.isArray(reference.replacement[field].data);
-        if (!x[field]) {x[field] = setField(fieldHasArray, reference.replacement[field].type)}
-        diffField(x[field], reference.replacement[field].data, fieldHasArray, false, handles.replacement);
-        Object.assign(x[field].subscribers, reference.replacement[field].subscribers);
+   // list of all reference objects, iterate through like a queue
+   live.references = [];
 
-        // TODO - have way of making sure child parentFields have reference back up to right field
-        //console.log('SHOULD NOT BE NULL', x[field])
-        reference.replacement[field] = x[field];
+   // list of all subscriber handles that have been changed
+   live.handles = [];
 
-      }
-      reference.replacement = x;
-      // go back into parent field and replace with id, check for changes
-      console.log('5******');
-      // console.log(reference);
+   live.nestedCount = 0;
+ }
 
-      if (!Array.isArray(reference.parentField)) {
-        console.log('not arr');
-        reference.parentField.data = val; // TODO this could be an issue
-        console.log('******5');
-        if (reference.existingData !== val) {
-          Object.assign(handles.replacement, reference.parentField.subscribers);
-        };
-      } else {
-        console.log('arr');
-        reference.parentField.data[index] = val; // TODO this could be an issue
-        console.log('******5');
-        if (reference.existingData[index] !== val) {
-          Object.assign(handles.replacement, reference.parentField.subscribers);
-        };
-      }
+ function resultIsArray(type) {
+   const typeString = type.toString()
+   return (typeString[0] === '[' && typeString[typeString.length-1] === ']')
+ }
 
-      // switch handles[count] to replacement handles
-      live.handles[count] = handles.replacement;
+ function resultIsObject(type) {
+   typeObj = (resultIsArray(type)) ? type.ofType: type;
+   return (!!typeObj._typeConfig)
+ }
 
-    }
+ // figures out context info of single object or array of objects
+ function setLiveContext(typeString, isArray, val) {
+   if (!isArray) return setOneLiveContext(typeString, val._id);
+   return val.map((obj, i) => {
+     obj.live = i;
+     return setOneLiveContext(typeString, obj.id);
+   })
+ }
 
-    // console.log('references', live.reference);
-    // console.log('handles', live.handles);
-    console.log('RDL', RDL.store);
-    // console.log('Query', RDL.store.Query);
-    // console.log('val', val);
-    return val;
-  });
-};
+ // creates (if neccesary) and returns context of a single object
+ function setOneLiveContext(typeString, id) {
+   if (!RDL.store[typeString]) {
+     RDL.store[typeString] = {};
+   }
+   if (!id) return RDL.store[typeString];
+   // Check if the object exists in the tree
+   if (!RDL.store[typeString][id]) {
+     RDL.store[typeString][id] = {};
+   }
+   return RDL.store[typeString][id]
+ }
 
-function resultIsArray(type) {
-  const typeString = type.toString()
-  return (typeString[0] === '[' && typeString[typeString.length-1] === ']')
-}
+ function setReferences(isArray, val, field, live) {
+   console.log('---------------------------SETTING A REFERENCE---------------------------------');
+   //console.log('******1');
+   const existingData = field.data
+   //console.log('1******');
+   const data = shuffleData(isArray, field, val);
+   if (!isArray) {
+     live.references.push(setReference(val, field, data, existingData));
+   } else {
+     val.forEach((obj, i) => {
+       //console.log('******4');
+       //console.log(field, data);
+       //console.log('4******');
+       live.references.push(setReference(obj, field, data[i], existingData[i], i));
+     });
+   }
+   //console.log('references', live.references);
+ }
 
-function resultIsObject(type) {
-  const typeObj = (resultIsArray(type)) ? type.ofType: type;
-  return (!!typeObj._typeConfig)
-}
+ function setReference(source, parentField, existing, existingData, i) {
+   return {
+     existing,
+     parentField,
+     existingData,
+     source,
+     parentIndex: i,
+     replacement: {},
+     handles: {
+       existing: {},
+       replacement: {}
+     }
+   };
+ }
 
-// figures out context info of single object or array of objects
-function setLiveContext(typeString, isArray, val) {
-if (!isArray) return setOneLiveContext(typeString, val._id);
-return val.map((obj, i) => {
-  obj.live = i;
-  return setOneLiveContext(typeString, obj.id);
-})
-}
+ function shuffleData(isArray, field, val) {
+   if (!isArray) {
+     const data = (typeof field.data === 'object') ? field.data: {};
+     if (!field.identified) field.data = data; // not already storing ids
+     return data;
+   }
+   if (field.data.length !== val.length && !field.identified) {
+     // ruh roh, already a difference
+   }
+   const refs = val.map((obj, i) => {
+     const data = (typeof field.data[i] === 'object') ? field.data[i]: {};
+     if (!field.identified) field.data[i] = data;
+     return data;
+   })
 
-// creates (if neccesary) and returns context of a single object
-function setOneLiveContext(typeString, id) {
-if (!RDL.store[typeString]) {
-  RDL.store[typeString] = {};
-}
-if (!id) return RDL.store[typeString];
-// Check if the object exists in the tree
-if (!RDL.store[typeString][id]) {
-  RDL.store[typeString][id] = {};
-}
-return RDL.store[typeString][id]
-}
+   field.data = field.data.slice(0, val.length); //cut'm down to size
 
-function setReferences(isArray, val, field, live) {
-console.log('---------------------------SETTING A REFERENCE---------------------------------');
-//console.log('******1');
-const existingData = field.data
-//console.log('1******');
-console.log('FFFFFFFFFF');
-const data = shuffleData(isArray, field, val);
-console.log('GGGGGGGGGGGGGG');
-if (!isArray) {
-  console.log('HHHHHHH');
-  live.references.push(setReference(val, field, data, existingData));
-  console.log('JJJJJJJJ');
-} else {
-  val.forEach((obj, i) => {
-    console.log('IIIIIIIIII');
-    //console.log('******4');
-    //console.log(field, data);
-    //console.log('4******');
-    live.references.push(setReference(obj, field, data[i], existingData[i]));
-  });
-}
-//console.log('references', live.references);
-}
+   return refs;
+ }
 
-function setReference(source, parentField, existing, existingData) {
-return {
-  existing,
-  parentField,
-  existingData,
-  source,
-  replacement: {},
-  handles: {
-    existing: {},
-    replacement: {}
-  }
-};
-}
+ function getReference(identifier) {
+   if (RDL.store[identifier]) return RDL.store[identifier];
+   RDL.store[identifier] = {};
+   return RDL.store[identifier];
+ }
 
-function shuffleData(isArray, field, val) {
-if (!isArray) {
-  //const data = (typeof field.data === 'object') ? field.data: {};
-  const data = {};
-  //console.log('****2')
-  field.data = data;
-  //console.log('2****')
-  return data;
-}
-return val.map((obj, i) => {
-  //const data = (typeof obj.data === 'object') ? obj.data: {};
-  const data = {};
-  //console.log('****3')
-  field.data[i] = data;
-  //console.log('3****')
+ function setField(isArray, typeString) {
+   // initialized field to default 'empty' state
+   return ({
+     data: (isArray ? [] : null),
+     subscribers: {},
+     type: typeString,
+     identified: false
+   });
+ }
 
-  return data;
-})
-}
+ function setFields(isArray, typeString, fieldString, reference) {
+   if (!reference.existing[fieldString]) {
+     reference.existing[fieldString] = setField(isArray, typeString)
+   }
+   if (!reference.replacement[fieldString]) {
+     reference.replacement[fieldString] = setField(isArray, typeString)
+   }
+ }
 
-function getReference(identifier) {
-if (RDL.store[identifier]) return RDL.store[identifier];
-RDL.store[identifier] = {};
-//console.log('xxxxxxx');
-return RDL.store[identifier];
-}
+ // compares old data to newly resolved data
+ function diffField(field, val, isArray, isObject, handles) {
+   //console.log('CANNOT BE UNDEFINED', field);
+   let changed = false;
 
-function setField(isArray, typeString) {
-// initialized field to default 'empty' state
-return ({
-  data: (isArray ? [] : null),
-  subscribers: {},
-  type: typeString
-});
-}
+   if (isArray) {
+     // compare each value of new data to old data
+     changed = val.reduce((acc, curr, i) => {
+       return (acc || curr !== field.data[i]);
+     }, false)
+     changed = changed || (val.length !== field.data.length);
 
-function setFields(isArray, typeString, fieldString, reference) {
-if (!reference.existing[fieldString]) {
-  reference.existing[fieldString] = setField(isArray, typeString)
-}
-if (!reference.replacement[fieldString]) {
-  reference.replacement[fieldString] = setField(isArray, typeString)
-}
-}
+   } else {
+     changed = (field.data !== val)
+   }
 
-// compares old data to newly resolved data
-function diffField(field, val, isArray, isObject, handles) {
-//console.log('CANNOT BE UNDEFINED', field);
-let changed = false;
+   if (changed) {
+     console.log('-------------THERE WAS A CHANGE------------------')
+     field.data = val; // overwrite field
 
-if (isArray) {
-  // compare each value of new data to old data
-  changed = val.reduce((acc, curr, i) => {
-    return (acc || curr !== field.data[i]);
-  }, false)
-  changed = changed || (val.length !== field.data.length);
+     // add subscribers of this data to list of handls to be fired back
+     Object.assign(handles, field.subscribers);
+   }
+ }
 
-} else {
-  changed = (field.data !== val)
-}
-
-if (changed) {
-  console.log('-------------THERE WAS A CHANGE------------------')
-  field.data = val; // overwrite field
-
-  // add subscribers of this data to list of handls to be fired back
-  Object.assign(handles, field.subscribers);
-}
-}
-
-function setFieldString(fieldString, args) {
-const argString = args.reduce((acc, curr) => {
-  const argKey = curr.name.value;
-  const argVal = (typeof curr.value.value === 'string') ? curr.value.value : JSON.stringify(curr.value.value);
-  return acc + ` ${argKey}: ${argVal}`
-}, '');
-return (!argString.length) ? fieldString : fieldString  + `(${argString} )`;
-}
+ function setFieldString(fieldString, args) {
+   const argString = args.reduce((acc, curr) => {
+     const argKey = curr.name.value;
+     const argVal = (typeof curr.value.value === 'string') ? curr.value.value : JSON.stringify(curr.value.value);
+     return acc + ` ${argKey}: ${argVal}`
+   }, '');
+   return (!argString.length) ? fieldString : fieldString  + `(${argString} )`;
+ }
 
 module.exports = liveResolver;

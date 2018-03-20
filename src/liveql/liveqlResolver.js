@@ -99,13 +99,19 @@ const liveResolver = (resolve, source, args, context, info) => {
       //field, val, isArray, isObject, handles
       diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
       diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
-      // console.log('QWQWQWQWQWQWQWQWQWQWQW', reference.existing);
     };
 
+<<<<<<< HEAD
     reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
     reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
 
     // console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
+=======
+    if (!mutation) {
+      reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
+      reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
+    }
+>>>>>>> 88443a016bd5d0f1beb1a009afe966367571a32a
 
     if (fieldName === idField) {
       setToID(val, reference, handles, live, count);
@@ -114,8 +120,7 @@ const liveResolver = (resolve, source, args, context, info) => {
       handles.existing = Object.assign( handles.existing, reference.existing[fieldString].subscribers);
       handles.replacement = Object.assign( handles.replacement, reference.replacement[fieldString].subscribers);
     }
-    // console.log('references', live.references);
-    console.log('Query', RDL.store);
+    // console.log('Query', RDL.store);
     return val;
   });
 };
@@ -159,13 +164,18 @@ const liveResolver = (resolve, source, args, context, info) => {
 
 function setToID(val, reference, handles, live, count) {
   let id = (typeof val === 'string') ? val : JSON.stringify(val);
+<<<<<<< HEAD
   console.log('this object has an id');
 
+=======
+  // console.log('this object has an id');
+>>>>>>> 88443a016bd5d0f1beb1a009afe966367571a32a
   // combine replacement with object with that id
   const transfer = getReference(id);
   let fields = Object.keys(reference.replacement);
-  console.log('fields', fields);
-  for (field of fields) {
+  // console.log('fields', fields);
+  for (let i = 0; i < fields.length; i ++) {
+    let field = fields[i];
     // diffField(field, val, isArray, isObject, handles)
     let fieldHasArray = Array.isArray(reference.replacement[field].data);
     if (!transfer[field]) {transfer[field] = setField(fieldHasArray, reference.replacement[field].type)}
@@ -176,17 +186,12 @@ function setToID(val, reference, handles, live, count) {
   // go back into parent field and replace with id, check for changes
 
   if (!Array.isArray(reference.parentField.data)) {
-    console.log('not arr');
-    console.log(typeof id);
     reference.parentField.data = id; // TODO this could be an issue
-    console.log('******5');
     if (reference.existingData !== id) {
       Object.assign(handles.replacement, reference.parentField.subscribers);
     };
   } else {
-    console.log('arr', typeof id, id, JSON.stringify(id), reference.parentIndex);
     reference.parentField.data[reference.parentIndex] = id; // TODO this could be an issue
-    console.log('******5');
     if (reference.existingData[reference.parentIndex] !== id) {
       Object.assign(handles.replacement, reference.parentField.subscribers);
     };
@@ -204,7 +209,7 @@ function checkReference(reference, live, source) {
     if (!reference || reference.source !== source) {
       return false;
     } else {
-      console.log('BEGINNING TO RESOLVE FIELDS ON NEW OBJECT');
+      // console.log('BEGINNING TO RESOLVE FIELDS ON NEW OBJECT');
       live.referenceCount ++;
       return reference;
     }
@@ -246,7 +251,7 @@ function resultIsObject(type) {
 }
 
 function setReferences(isArray, val, field, live) {
-  console.log('---------------------------SETTING A REFERENCE---------------------------------');
+  // console.log('---------------------------SETTING A REFERENCE---------------------------------');
   const existingData = field.data
   const data = shuffleData(isArray, field, val);
   if (!isArray) {
@@ -336,7 +341,7 @@ function diffField(field, val, isArray, isObject, handles) {
   }
 
   if (changed) {
-    console.log('-------------THERE WAS A CHANGE------------------')
+    // console.log('-------------THERE WAS A CHANGE------------------')
     field.data = val;
 
     // add subscribers of this data to list of handles to be fired back

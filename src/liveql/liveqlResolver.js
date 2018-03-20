@@ -19,20 +19,20 @@ const RDL = require('./reactiveDataLayer');
 
 const liveResolver = (resolve, source, args, context, info) => {
 
-  // return resolve().then((val) => {return val});
+  // return resolve().then((val) => {return val}); // uncomment to switch off all liveResolver functionality
+
   // assign 'live' alias
   let live = initializeLive(context);
 
   // do these all need to be variables?
   const handle = live.handle; // || 'Temporary Handle';
-  const alias = live.directive || 'live';
+  // const alias = live.directive || 'live';
   const idField = live.uid || 'id';
   const mutation = live.mutation;
   const del = (!! args.del);
 
   // if this is neither a mutation nor live query, resolve without doing anything
   if (!handle && !mutation) {return resolve().then((val) => {return val})};
-
 
   // if this this is the first resolver to be called, set parameters to default
   if (!live.resolverCount) { setLiveDefaults(live) };
@@ -52,7 +52,7 @@ const liveResolver = (resolve, source, args, context, info) => {
   // strip off [ ] if it's an array
   if (isArray) {typeString = typeString.substring(1, typeString.length - 1)};
 
-  // The GraphQL type as a String that the parent field resolved to
+  // The GraphQL type (as a String) that the parent field resolved to
   const parentString = info.parentType.toString();
 
   const fieldName = info.fieldName;
@@ -64,9 +64,10 @@ const liveResolver = (resolve, source, args, context, info) => {
   // reference keeps track of where we are within the RDL. It stores references to objects
   let reference = live.references[live.referenceCount];
 
-  // the resolved value is an orphan if no parent set a reference point for it
+  // looks for corresponding references in live.references
   if (!rootResolver) {reference = checkReference(reference, live, source)};
 
+  // if there is no context and it's not top-level, immediately resolve
   if (!reference && !rootResolver) {
     console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
     console.log('Or maybe you\'re a hacker tryn\'a subscribe within fields you aren\'t s\'posta. Naughty.');
@@ -87,10 +88,9 @@ const liveResolver = (resolve, source, args, context, info) => {
   //console.log('outer resolve', reference)
 
   return resolve().then((val) => {
-    console.log('inner resolve', reference.replacement, reference.existing)
+    // console.log('inner resolve', reference.replacement, reference.existing)
     setFields(isArray, typeString, fieldString, reference);
 
-    // KEEP CHILD POINTED TO RIGHT PARENTSTRING
     if (isObject) {
       reference.replacement[fieldString] = reference.existing[fieldString];
       setReferences(isArray, val, reference.existing[fieldString], live);

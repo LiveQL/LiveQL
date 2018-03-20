@@ -26,10 +26,10 @@ const liveResolver = (resolve, source, args, context, info) => {
 
   // do these all need to be variables?
   const handle = live.handle; // || 'Temporary Handle';
-  // const alias = live.directive || 'live';
+  const alias = live.directive || 'live';
   const idField = live.uid || 'id';
   const mutation = live.mutation;
-  const del = (!! args.del);
+  const del = (!!args.del);
 
   // if this is neither a mutation nor live query, resolve without doing anything
   if (!handle && !mutation) {return resolve().then((val) => {return val})};
@@ -69,8 +69,8 @@ const liveResolver = (resolve, source, args, context, info) => {
 
   // if there is no context and it's not top-level, immediately resolve
   if (!reference && !rootResolver) {
-    console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
-    console.log('Or maybe you\'re a hacker tryn\'a subscribe within fields you aren\'t s\'posta. Naughty.');
+    // console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
+    // console.log('Or maybe you\'re a hacker tryn\'a subscribe within fields you aren\'t s\'posta. Naughty.');
     return resolve().then((val) => {return val});
   }
 
@@ -99,17 +99,19 @@ const liveResolver = (resolve, source, args, context, info) => {
       //field, val, isArray, isObject, handles
       diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
       diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
-      console.log('QWQWQWQWQWQWQWQWQWQWQW', reference.existing);
+      // console.log('QWQWQWQWQWQWQWQWQWQWQW', reference.existing);
     };
 
+>>>>>>> e036187b91ba60b3fdbe0e31dcc4066e52226d23
     reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
     reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
 
-    console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
+    // console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
 
     if (fieldName === idField) {
       setToID(val, reference, handles, live, count);
     }
+>>>>>>> e036187b91ba60b3fdbe0e31dcc4066e52226d23
     if (del) {
       handles.existing = Object.assign( handles.existing, reference.existing[fieldString].subscribers);
       handles.replacement = Object.assign( handles.replacement, reference.replacement[fieldString].subscribers);
@@ -160,6 +162,7 @@ const liveResolver = (resolve, source, args, context, info) => {
 function setToID(val, reference, handles, live, count) {
   let id = (typeof val === 'string') ? val : JSON.stringify(val);
   console.log('this object has an id');
+>>>>>>> db04b628f30f2d48b3c83ad76ffc8c3841acb65f
   // combine replacement with object with that id
   const transfer = getReference(id);
   let fields = Object.keys(reference.replacement);
@@ -213,8 +216,6 @@ function checkReference(reference, live, source) {
 
 function initializeLive(context) {
   if (!context.__live) {
-    console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)
-    console.log('next time run your queries through our Middleware!')
     context.__live = {};
   }
   return context.__live;

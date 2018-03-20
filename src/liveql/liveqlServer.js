@@ -1,6 +1,6 @@
 
 const liveConfig = require('./liveqlConfig');
-const { afterQuery } = require('./liveqlResponse');
+const { afterQuery } = require('./liveqlSocket');
 const { graphqlExpress } = require('apollo-server-express');
 
 /**

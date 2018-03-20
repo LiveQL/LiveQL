@@ -8,10 +8,39 @@
  */
 
 const sio = require('socket.io');
-const rdl = require('./rdl');
+
+// REMOVE ME
+// You'll be passed in three paremters now from the RDL.  
+// Maybe remove this.
+const rdl = require('./reactiveDataLayer');
 const { graphql } = require('graphql');
 
 const liveServer = {};
+
+
+/**
+ * Function below matches the signature of what we need.
+ */
+
+/**
+ * This function fires after the resolution of a GraphQL query.
+ * 
+ * @param {Object} response - The GraphQL response to be sent back to the client.
+ * @param {Object} queue - The queue of users that need to be notified of changes.
+ * @param {String} handle - The handle of the client. Needs to be passed back in the response.
+ */
+module.exports = afterQuery(response, queue, handle) {
+	console.log('after');
+  // If a handle was passed in the client needs it as part of the response.
+  // This will be what they listen for on the client.
+	if (handle) response.handle = handle;
+	// Testing
+	console.log(response);
+	// There's nothing in the queue ATM.
+	if (queue.length === 0) return response;
+	// Loop over queue, run query, and send response. 
+	return response;
+}
 
 liveServer.io = null;
 
@@ -55,6 +84,6 @@ liveServer.emit = (schema) => {
 }
 
 
+// Only need the one function that takes the GraphQL response.
 module.exports = liveServer;
-
 

@@ -28,8 +28,8 @@ const liveResolver = (resolve, source, args, context, info) => {
   const handle = live.handle;
   const alias = live.directive || 'live';
   const idField = live.uid || 'id';
-  const mutation = false;
-  const del = (!! args.del);
+  const mutation = live.mutation;
+  const del = (!!args.del);
 
   // if this is neither a mutation nor live query, resolve without doing anything
   if (!handle && !mutation) {return resolve().then((val) => {return val})};
@@ -69,8 +69,8 @@ const liveResolver = (resolve, source, args, context, info) => {
   if (!rootResolver) {reference = checkReference(reference, live, source)};
 
   if (!reference && !rootResolver) {
-    console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
-    console.log('Or maybe you\'re a hacker tryn\'a subscribe within fields you aren\'t s\'posta. Naughty.');
+    // console.log('This will resolve an orphan. You should add @live to the parent field in the Schema');
+    // console.log('Or maybe you\'re a hacker tryn\'a subscribe within fields you aren\'t s\'posta. Naughty.');
     return resolve().then((val) => {return val});
   }
 
@@ -88,7 +88,7 @@ const liveResolver = (resolve, source, args, context, info) => {
   //console.log('outer resolve', reference)
 
   return resolve().then((val) => {
-    console.log('inner resolve', reference.replacement, reference.existing)
+    // console.log('inner resolve', reference.replacement, reference.existing)
     setFields(isArray, typeString, fieldString, reference);
 
     // KEEP CHILD POINTED TO RIGHT PARENTSTRING
@@ -104,22 +104,22 @@ const liveResolver = (resolve, source, args, context, info) => {
       //field, val, isArray, isObject, handles
       diffField(reference.existing[fieldString], val, isArray, false, handles.existing);
       diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
-      console.log('QWQWQWQWQWQWQWQWQWQWQW', reference.existing);
+      // console.log('QWQWQWQWQWQWQWQWQWQWQW', reference.existing);
     };
 
     //console.log('set context');
-    console.log(Object.keys(reference.existing), reference.existing, fieldString, reference.existing[fieldString]);
-    console.log('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ', reference.existing[fieldString].subscribers, reference.replacement[fieldString].subscribers)
+    // console.log(Object.keys(reference.existing), reference.existing, fieldString, reference.existing[fieldString]);
+    // console.log('QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ', reference.existing[fieldString].subscribers, reference.replacement[fieldString].subscribers)
     reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
     reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
 
-    console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
+    // console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
 
     if (fieldName === idField) {
       setToID(val, reference, handles, live, count);
     }
 
-    console.log('references', live.references);
+    // console.log('references', live.references);
     // console.log('handles', live.queue);
   //  if (RDL.store['5a9b26de4d33148fb6718929']) {
       // console.log('RDL', RDL.store);
@@ -174,7 +174,7 @@ const liveResolver = (resolve, source, args, context, info) => {
 
 
 function setToID(val, reference, handles, live, count) {
-  console.log('this object has an id');
+  // console.log('this object has an id');
   // combine replacement with object with that id
   const x = getReference(val);
   let fields = Object.keys(reference.replacement);
@@ -193,20 +193,20 @@ function setToID(val, reference, handles, live, count) {
   }
   reference.replacement = x;
   // go back into parent field and replace with id, check for changes
-  console.log('5******');
+  // console.log('5******');
   // console.log(reference);
 
   if (!Array.isArray(reference.parentField.data)) {
-    console.log('not arr');
+    // console.log('not arr');
     reference.parentField.data = val; // TODO this could be an issue
-    console.log('******5');
+    // console.log('******5');
     if (reference.existingData !== val) {
       Object.assign(handles.replacement, reference.parentField.subscribers);
     };
   } else {
-    console.log('arr', val, reference.parentIndex);
+    // console.log('arr', val, reference.parentIndex);
     reference.parentField.data[reference.parentIndex] = val; // TODO this could be an issue
-    console.log('******5');
+    // console.log('******5');
     if (reference.existingData[reference.parentIndex] !== val) {
       Object.assign(handles.replacement, reference.parentField.subscribers);
     };
@@ -235,8 +235,6 @@ function checkReference(reference, live, source) {
 
 function initializeLive(context) {
   if (!context.__live) {
-    console.log(`no context.__live was set. That is srsly messed up. What's a guy to do?`)
-    console.log('next time run your queries through our Middleware!')
     context.__live = {};
   }
   return context.__live;
@@ -291,7 +289,7 @@ function setOneLiveContext(typeString, id) {
 }
 
 function setReferences(isArray, val, field, live) {
-  console.log('---------------------------SETTING A REFERENCE---------------------------------');
+  // console.log('---------------------------SETTING A REFERENCE---------------------------------');
   //console.log('******1');
   const existingData = field.data
   //console.log('1******');
@@ -388,7 +386,7 @@ function diffField(field, val, isArray, isObject, handles) {
   }
 
   if (changed) {
-    console.log('-------------THERE WAS A CHANGE------------------')
+    // console.log('-------------THERE WAS A CHANGE------------------')
     field.data = val; // overwrite field
 
     // add subscribers of this data to list of handls to be fired back

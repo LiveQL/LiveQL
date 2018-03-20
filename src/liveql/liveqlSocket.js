@@ -22,16 +22,15 @@ liveSocket.instatiateIO = () => liveSocket.io;
 liveSocket.initialize = (server, schema) => {
   liveSocket.schema = schema;
   liveSocket.io = sio(server);
-};
-
-// Decrement subscribers on
-liveSocket.io.on('connection', (socket) => {
-  socket.on('unload', (data) => {
-    data.forEach((handle) => {
-      rdl.subscriptions[handle].subscribers -= 1;
+  // Decrement subscribers on disconnect
+  liveSocket.io.on('connection', (socket) => {
+    socket.on('unload', (data) => {
+      data.forEach((handle) => {
+        rdl.subscriptions[handle].subscribers -= 1;
+      });
     });
   });
-});
+};
 
 liveSocket.emit = (schema) => {
   // Loop over new queue; 

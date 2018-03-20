@@ -18,6 +18,12 @@ module.exports = (req, res, next) => {
   const { variables } = req.body;
   const open = query.indexOf('{');
 
+  // Check if this is a mutation.
+  if (query.slice(0, open).includes('mutation')) {
+    res.locals.mutation = true;
+    return next();
+  }
+  res.locals.mutation = false;
   // This is a not a query, so it cannot subscribe to data.
   if (open !== 0 && !query.slice(0, open).includes('query')) return next();
 

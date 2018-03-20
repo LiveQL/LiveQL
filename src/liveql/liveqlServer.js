@@ -35,6 +35,7 @@ module.exports = (graphqlObj) => {
     // In the event of a mutation, subscribers will be added to this queue.
     res.locals.queue = [];
     liveqlObj.context.__live.queue = res.locals.queue;
+
     // If the user is already using the formatResponse function.
     if (liveqlObj.formatResponse) {
       // There's already a function defined in formatResponse.

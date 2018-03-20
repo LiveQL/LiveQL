@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
 
   // Store the handle for this user in res.locals.handle.
   res.locals.handle = hash;
-  // Strip directive from query. 
+  // Strip directive from query.
   req.body.query = req.body.query.replace(reg, '');
   return next();
 };

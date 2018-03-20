@@ -8,7 +8,7 @@ const liveqlServer = require('./liveql/liveqlServer');
 const liveqlProcess = require('./liveql/liveqlProcess');
 
 // Live resolver function.
-const liveqlResolver = require('./liveql/liveResolver');
+const liveqlResolver = require('./liveql/liveqlResolver');
 
 // Client functions.
 const liveqlClient = require('./liveql/liveqlClient');

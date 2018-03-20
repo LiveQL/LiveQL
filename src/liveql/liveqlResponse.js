@@ -29,7 +29,7 @@ const liveServer = {};
  * @param {Object} queue - The queue of users that need to be notified of changes.
  * @param {String} handle - The handle of the client. Needs to be passed back in the response.
  */
-module.exports = afterQuery(response, queue, handle) {
+module.exports = (response, queue, handle) => {
 	console.log('after');
   // If a handle was passed in the client needs it as part of the response.
   // This will be what they listen for on the client.
@@ -37,10 +37,10 @@ module.exports = afterQuery(response, queue, handle) {
 	// Testing
 	console.log(response);
 	// There's nothing in the queue ATM.
-	if (queue.length === 0) return response;
+	if (!queue) return response;
 	// Loop over queue, run query, and send response. 
 	return response;
-}
+};
 
 liveServer.io = null;
 
@@ -85,5 +85,5 @@ liveServer.emit = (schema) => {
 
 
 // Only need the one function that takes the GraphQL response.
-module.exports = liveServer;
+// module.exports = liveServer;
 

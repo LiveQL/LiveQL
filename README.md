@@ -1,9 +1,9 @@
 # LiveQL
 LiveQL is a library for implementing live queries in GraphQL. We're currently in beta, so use with caution. 
 
-It can be difficult to maintain live data in a GraphQL application. There are a couple common strategies. You can request updates from your server at some specified interval (polling). You can use the built in GraphQL subscription operation with WebSockets, or some other form of pub/sub. There are pros and cons to both, but there are times when neither are a great option. Polling can be inefficient. Event subscription can be tedious if there’s a lot of events that can change data. 
+It can be difficult to maintain live data in a GraphQL application. There are a couple common strategies. You can request updates from your server at some specified interval (polling). You can use the built-in GraphQL subscription operation with WebSockets, or some other form of pub/sub. There are pros and cons to both, but there are times when neither are a great option. Polling can be inefficient. Event subscription can be tedious if there’s a lot of events that can change data. 
 
-LiveQL is most similar to the subscription model. The difference is that instead of subscribing to events that change data, you subscribe directly to the data. This means that regardless of how the data changes, you’re application can maintain state.
+LiveQL is most similar to the subscription model. The difference is that instead of subscribing to events that change data, you subscribe directly to the data. This means that regardless of how the data changes, your application can maintain state.
 
 Check out our [wiki](https://github.com/LiveQL/LiveQL/wiki) for more details and documentation!
 

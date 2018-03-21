@@ -258,9 +258,6 @@ function shuffleData(isArray, field, val, handles) {
   }
   // if there's a mismatch in length between current values and new ones, something changed
   if (field.data.length !== val.length && !field.identified) {
-    console.log('Something was added or removed');
-    console.log(field.data.length);
-    console.log(val.length)
     handles.existing = Object.assign( handles.existing, field.subscribers);
     handles.replacement = Object.assign( handles.replacement, field.subscribers);
   }
@@ -320,7 +317,7 @@ function diffField(field, val, isArray, isObject, handles) {
   }
 
   if (changed) {
-    console.log('-------------THERE WAS A CHANGE------------------')
+    // console.log('-------------THERE WAS A CHANGE------------------')
     field.data = val;
     // add subscribers of this data to list of handles to be fired back
     Object.assign(handles, field.subscribers);

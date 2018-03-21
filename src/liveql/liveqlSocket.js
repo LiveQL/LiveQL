@@ -32,47 +32,34 @@ liveSocket.initialize = (server, schema) => {
   });
 };
 
-liveSocket.emit = (schema) => {
-  // Loop over new queue; 
-  // for (hashKey in rdl.queue) {
-	// 	const query = async (rdlHash, hashKey) => {
-	// 		graphql(schema, rdlHash.query)
-	// 			.then(data => {
-	// 				liveSocket.io.sockets.emit(hashKey, data)
-	// 			})
-	// 	}
-	// 	query(rdl.subscriptions[hashKey], hashKey)
-	// }
-}
-
-//we built this emit function based on the assumption
-//that max and andrew were decent developers
-//and structured the rdl like this: 	hashedOneQuery: {
-// RDL.subscriptions = {
-// 	hashedTwoQuery: {
-// 		query: "query { getAllTopics { _id topic }}",
-// 		subscribers: 30
+// liveSocket.emit = (schema) => {
+// Loop over new queue; 
+// for (hashKey in rdl.queue) {
+// 	const query = async (rdlHash, hashKey) => {
+// 		graphql(schema, rdlHash.query)
+// 			.then(data => {
+// 				liveSocket.io.sockets.emit(hashKey, data)
+// 			})
 // 	}
-// };
-
-
-/**
- * NEEDS:
- * We need a function that process the queue and sends the updates back the subscribers
- * We need a function that creates the WebSocket server.
- */
+// 	query(rdl.subscriptions[hashKey], hashKey)
+// }
+// }
 
 /**
  * This function fires after the resolution of a GraphQL query.
- * 
- * @param {Object} response - The GraphQL response to be sent back to the client.
  * @param {Object} queue - The queue of users that need to be notified of changes.
- * @param {String} handle - The handle of the client. Needs to be passed back in the response.
+ * @param {Boolean} mutation - This will be set to true if data was mutated.
  */
-
 function afterQuery(queue, mutation) {
-  console.log('mutation', mutation);
-	console.log(queue);
-	return;
+  if (!mutation) return;
+  const handles = Object.keys(Object.assign({}, ...queue));
+  handles.forEach((handle) => {
+    const { query, vars } = rdl.subscriptions[handle];
+    graphql(liveSocket.schema, query, null, {}, vars).then((result) => {
+      console.log('data', result.data);
+      // EMIT DATA TO CLIENT HERE!
+    });
+  });
 }
+
 module.exports = { afterQuery, liveqlSocket: liveSocket.initialize };

@@ -101,17 +101,10 @@ const liveResolver = (resolve, source, args, context, info) => {
       diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
     };
 
-<<<<<<< HEAD
-    reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
-    reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
-
-    // console.log('fsdghlfdsgjlfsdgjhfdsghfsd', reference.replacement)
-=======
     if (!mutation) {
       reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
       reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
     }
->>>>>>> 88443a016bd5d0f1beb1a009afe966367571a32a
 
     if (fieldName === idField) {
       setToID(val, reference, handles, live, count);
@@ -164,12 +157,7 @@ const liveResolver = (resolve, source, args, context, info) => {
 
 function setToID(val, reference, handles, live, count) {
   let id = (typeof val === 'string') ? val : JSON.stringify(val);
-<<<<<<< HEAD
-  console.log('this object has an id');
-
-=======
   // console.log('this object has an id');
->>>>>>> 88443a016bd5d0f1beb1a009afe966367571a32a
   // combine replacement with object with that id
   const transfer = getReference(id);
   let fields = Object.keys(reference.replacement);

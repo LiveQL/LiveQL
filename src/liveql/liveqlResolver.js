@@ -133,7 +133,7 @@ function setToID(val, reference, handles, live, count) {
     if (reference.existingData[reference.parentIndex] !== id) {
       Object.assign(handles.replacement, reference.parentField.subscribers);
     };
-    reference.parentIndex ++;
+    reference.parentIndex++;
   }
 
   // switch handles[count] from existing to replacement handles

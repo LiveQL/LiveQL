@@ -6,7 +6,6 @@ const liveConfig = require('./liveqlConfig');
  * This function creates a "hash" of a GraphQL query that is used as a WebSocket channel
  * identifier. It stores that "hash" with the query string in an object that is used
  * to subscribe to data during the resolution process.
- *
  * @param {Object} req - Express req object.
  * @param {Object} res - Express res object.
  * @param {Function} next - Express next function.

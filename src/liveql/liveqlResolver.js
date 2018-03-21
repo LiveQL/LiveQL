@@ -22,15 +22,9 @@ const liveResolver = (resolve, source, args, context, info) => {
   // set context.__Live as live alias
   let live = initializeLive(context);
 
-  if (info.parentType.toString() === 'Mutation') live.mutation = true;
-  const handle = live.handle || 'Temporary Handle';
-  // const alias = live.directive || 'live';
-  const idField = live.uid || 'id';
-  const mutation = live.mutation;
-  const del = (!!args.del);
-
+  //if (info.parentType.toString() === 'Mutation') live.mutation = true;
   // if this is neither a mutation nor live query, resolve without doing anything
-  if (!handle && !mutation) {return resolve().then((val) => {return val})};
+  if (!live.handle && !live.mutation) {return resolve().then((val) => {return val})};
   // if this this is the first resolver to be called, set parameters to default
   if (!live.resolverCount) { setLiveDefaults(live) };
   // increment and set to local variable, will stay the same even if live.resolverCount is incremented elsewhere
@@ -76,21 +70,21 @@ const liveResolver = (resolve, source, args, context, info) => {
       diffField(reference.replacement[fieldString], val, isArray, false, handles.replacement);
     };
 
-    if (!mutation) {
-      reference.existing[fieldString].subscribers[handle] = true; // add current handle to subscribers
-      reference.replacement[fieldString].subscribers[handle] = true; // add current handle to subscribers
+    if (!live.mutation) {
+      reference.existing[fieldString].subscribers[live.handle] = true; // add current handle to subscribers
+      reference.replacement[fieldString].subscribers[live.handle] = true; // add current handle to subscribers
     }
 
-    if (fieldName === idField) {
+    if (fieldName === live.uid) {
       setToID(val, reference, handles, live, count);
     }
 
-    if (del) {
+    if (!!args.del) {
       handles.existing = Object.assign( handles.existing, reference.existing[fieldString].subscribers);
       handles.replacement = Object.assign( handles.replacement, reference.replacement[fieldString].subscribers);
     }
 
-    // console.log('Store', RDL.store);
+    // console.log('Store', RDL.store['"5a9b26de4d33148fb6718928"']);
     // console.log('Handle Queue', live.queue);
     return val;
   });
@@ -121,6 +115,7 @@ function setToID(val, reference, handles, live, count) {
 
   // resets replacement to be reference to RDL object
   reference.replacement = transfer;
+  reference.existing = transfer;
 
   // go back into parent field and replace with id, check for changes
   if (!Array.isArray(reference.parentField.data)) {
@@ -167,6 +162,8 @@ function initializeLive(context) {
   if (!context.__live) {
     context.__live = {};
   }
+  context.__live.uid = context.__live.uid || 'id';
+  //context.__live.handle = context.__live.handle || 'Placeholder';
   return context.__live;
 }
 
@@ -261,6 +258,9 @@ function shuffleData(isArray, field, val, handles) {
   }
   // if there's a mismatch in length between current values and new ones, something changed
   if (field.data.length !== val.length && !field.identified) {
+    console.log('Something was added or removed');
+    console.log(field.data.length);
+    console.log(val.length)
     handles.existing = Object.assign( handles.existing, field.subscribers);
     handles.replacement = Object.assign( handles.replacement, field.subscribers);
   }
@@ -320,7 +320,7 @@ function diffField(field, val, isArray, isObject, handles) {
   }
 
   if (changed) {
-    // console.log('-------------THERE WAS A CHANGE------------------')
+    console.log('-------------THERE WAS A CHANGE------------------')
     field.data = val;
     // add subscribers of this data to list of handles to be fired back
     Object.assign(handles, field.subscribers);

@@ -44,10 +44,12 @@ function afterQuery(queue, mutation) {
   if (!mutation) return;
   const handles = Object.keys(Object.assign({}, ...queue));
   handles.forEach((handle) => {
-    const { query, vars } = rdl.subscriptions[handle];
-    graphql(liveSocket.schema, query, null, {}, vars).then((result) => {
-      liveSocket.io.sockets.emit(handle, result.data);
-    });
+    if (rdl.subscriptions[handle]) {
+      const { query, vars } = rdl.subscriptions[handle];
+      graphql(liveSocket.schema, query, null, {}, vars).then((result) => {
+        liveSocket.io.sockets.emit(handle, result.data);
+      });
+    }
   });
 }
 

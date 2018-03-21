@@ -1,33 +1,34 @@
-//web socket on mount stuff
-import SocketIOClient from 'socket.io-client'
+/**
+ * This file contains the functions needed to set LiveQL up
+ * on the client.
+ */
 
-const liveClient = {};
+import SocketIOClient from 'socket.io-client';
 
-//store of live socket handles.
-liveClient.handles = [];
+const liveqlClient = {};
 
-liveClient.connect = (endpoint) => {
-	liveClient.socket = SocketIOClient.connect(endpoint);
-	//invoking this for the developer right off the bat.
-	liveClient.windowUnload();
-}
+// Array of live socket handles.
+liveqlClient.handles = [];
 
-liveClient.windowUnload = () => {
-	window.addEventListener("beforeunload", function (event) {
-		liveClient.socket.emit('unload', liveClient.handles)
-	});
-}
+liveqlClient.connect = (endpoint) => {
+  liveqlClient.socket = SocketIOClient.connect(endpoint);
+  liveqlClient.windowUnload();
+};
 
-liveClient.on = (socketHandler, callback) => {
-	if (!liveClient.handles.includes(socketHandler)) {
-		liveClient.handles.push(socketHandler)
-		liveClient.socket.on(socketHandler, (data) => {
-			//the developer will pass in their callback for the data.
-			callback(data);
-		});
-	}
-}
+liveqlClient.windowUnload = () => {
+  window.addEventListener('beforeunload', () => {
+    liveqlClient.socket.emit('unload', liveqlClient.handles);
+  });
+};
 
+liveqlClient.on = (socketHandler, callback) => {
+  if (!liveqlClient.handles.includes(socketHandler)) {
+    liveqlClient.handles.push(socketHandler);
+    liveqlClient.socket.on(socketHandler, (data) => {
+      // Callback function for manipulating GraphQL data.
+      callback(data);
+    });
+  }
+};
 
-
-module.exports = liveClient;
+module.exports = liveqlClient;

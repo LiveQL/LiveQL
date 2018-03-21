@@ -1,6 +1,6 @@
-/** 
- * This file will house the functions necessary for setting up liveQL on
- * the server. Any configurations should be passed into this function.
+/**
+ * This file contains the functions needed for handling WebSockets
+ * on the server.
  *
  */
 
@@ -17,8 +17,11 @@ liveSocket.schema = null;
 
 liveSocket.instatiateIO = () => liveSocket.io;
 
-// Initialize Socket.io server. Require that the
-// user passes in the GraphQL schema.
+/**
+ * This function sets up the socket.io server.
+ * @param {Object} server - The HTTP server object.
+ * @param {Object} schema - The GraphQL schema object.
+ */
 liveSocket.initialize = (server, schema) => {
   liveSocket.schema = schema;
   liveSocket.io = sio(server);
@@ -32,19 +35,6 @@ liveSocket.initialize = (server, schema) => {
   });
 };
 
-// liveSocket.emit = (schema) => {
-// Loop over new queue; 
-// for (hashKey in rdl.queue) {
-// 	const query = async (rdlHash, hashKey) => {
-// 		graphql(schema, rdlHash.query)
-// 			.then(data => {
-// 				liveSocket.io.sockets.emit(hashKey, data)
-// 			})
-// 	}
-// 	query(rdl.subscriptions[hashKey], hashKey)
-// }
-// }
-
 /**
  * This function fires after the resolution of a GraphQL query.
  * @param {Object} queue - The queue of users that need to be notified of changes.
@@ -56,8 +46,7 @@ function afterQuery(queue, mutation) {
   handles.forEach((handle) => {
     const { query, vars } = rdl.subscriptions[handle];
     graphql(liveSocket.schema, query, null, {}, vars).then((result) => {
-      console.log('data', result.data);
-      // EMIT DATA TO CLIENT HERE!
+      liveSocket.io.sockets.emit(handle, result.data);
     });
   });
 }

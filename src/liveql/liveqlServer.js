@@ -6,7 +6,6 @@ const { graphqlExpress } = require('apollo-server-express');
 /**
  * This function wraps around the graphqlExpress function. It creates a GraphQL HTTP server
  * with modifications to the context and formatResponse field.
- *
  * @param {Object} graphqlObj - The config object that is required for graphqlExpress.
  */
 module.exports = (graphqlObj) => {
@@ -37,23 +36,9 @@ module.exports = (graphqlObj) => {
     liveqlObj.context.__live.queue = res.locals.queue;
 
     /**
-     * THIS IS A BUG. FIX ME?
+     * Add a check here to see if the formatResponse property already has a function.
+     * Make it so that it can call that function after the afterQuery function.
      */
-    // If the user is already using the formatResponse function.
-    // if (liveqlObj.formatResponse) {
-    //   // There's already a function defined in formatResponse.
-    //   const fn = liveqlObj.formatResponse;
-    //   liveqlObj.formatResponse = (val) => {
-    //     // Check if this is a live query and add the handle to response.
-    //     if (liveqlObj.context.__live.handle) {
-    //       val.handle = liveqlObj.context.__live.handle;
-    //     };
-    //     // Pass the queue and the hashed query to the formatResponse function.
-    //     // Pass in res.locals.mutation
-    //     afterQuery(res.locals.queue, res.locals.mutation);
-    //     return fn(val);
-    //   };
-    // } else {
     liveqlObj.formatResponse = (val) => {
       if (liveqlObj.context.__live.handle) {
         val.handle = liveqlObj.context.__live.handle;
@@ -61,7 +46,7 @@ module.exports = (graphqlObj) => {
       afterQuery(res.locals.queue, res.locals.mutation);
       return val;
     };
-    // }
+
     return graphqlExpress(liveqlObj)(req, res, next);
   };
 };

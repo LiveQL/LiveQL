@@ -7,6 +7,7 @@
 const sio = require('socket.io');
 const rdl = require('./reactiveDataLayer');
 const { graphql } = require('graphql');
+const { uid } = require('./liveqlConfig').get();
 
 const liveSocket = {};
 liveSocket.io = null;
@@ -44,10 +45,14 @@ function afterQuery(queue, mutation) {
   if (!mutation) return;
   const handles = Object.keys(Object.assign({}, ...queue));
   handles.forEach((handle) => {
-    const { query, vars } = rdl.subscriptions[handle];
-    graphql(liveSocket.schema, query, null, {}, vars).then((result) => {
-      liveSocket.io.sockets.emit(handle, result.data);
-    });
+    if (rdl.subscriptions[handle]) {
+      const { query, vars } = rdl.subscriptions[handle];
+      // Set context with handle for subscribing.
+      const context = { __live: { handle, uid } };
+      graphql(liveSocket.schema, query, null, context, vars).then((result) => {
+        liveSocket.io.sockets.emit(handle, result.data);
+      });
+    }
   });
 }
 

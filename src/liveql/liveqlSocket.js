@@ -47,6 +47,7 @@ function afterQuery(queue, mutation) {
   handles.forEach((handle) => {
     if (rdl.subscriptions[handle]) {
       const { query, vars } = rdl.subscriptions[handle];
+      // Set context with handle for subscribing
       const context = { __live: { handle, uid } };
       graphql(liveSocket.schema, query, null, context, vars).then((result) => {
         liveSocket.io.sockets.emit(handle, result.data);

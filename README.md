@@ -28,7 +28,7 @@ Please submit issues/pull requests if you have feedback or message the LiveQL te
 
 * **Max White** - [meIIow](https://github.com/meIIow)
 
-* **Skylar Escobedo** - [NewSky54](https://github.com/NewSky54)
+* **Skyler Escobedo** - [NewSky54](https://github.com/NewSky54)
 
 * **Eric Carrillo** - [saltyandsmiling](https://github.com/saltyandsmiling)
 
